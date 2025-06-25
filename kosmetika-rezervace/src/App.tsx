@@ -4,14 +4,26 @@ import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
+import ProtectedRoute from './components/ProtectedRoute';
+import Navbar from './components/navbar';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/profile" element={<Profile />} />
-    </Routes>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </>
   );
 }
 
