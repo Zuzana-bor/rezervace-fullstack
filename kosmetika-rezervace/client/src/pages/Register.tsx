@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, Button, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Paper,
+} from '@mui/material';
 import axios from 'axios';
 
 const Register = () => {
@@ -22,11 +29,11 @@ const Register = () => {
       alert('Zadej jméno');
       return;
     }
+
     try {
-      // Pokud v index.ts máte app.use('/auth', authRoutes);
       const response = await axios.post(
         'http://localhost:5000/auth/register',
-        form,
+        form
       );
       setMessage(response.data.message);
       login(form.email, form.name, form.password);
@@ -34,65 +41,113 @@ const Register = () => {
     } catch (error) {
       console.error('Chyba při registraci:', error);
       setMessage(
-        'Chyba při registraci. Zkontrolujte, že backend běží a endpoint je správný.',
+        'Chyba při registraci. Zkontrolujte, že backend běží a endpoint je správný.'
       );
     }
   };
 
   return (
-    <Box sx={{ maxWidth: 400, margin: 'auto', mt: 5 }}>
-      <Typography variant="h4" gutterBottom>
-        Registrace
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          fullWidth
-          label="Jméno"
-          name="name"
-          value={form.name}
-          onChange={(e) =>
-            setForm({ ...form, [e.target.name]: e.target.value })
-          }
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="E-mail"
-          name="email"
-          type="email"
-          value={form.email}
-          onChange={(e) =>
-            setForm({ ...form, [e.target.name]: e.target.value })
-          }
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Password"
-          name="password"
-          type="password"
-          value={form.password}
-          onChange={(e) =>
-            setForm({ ...form, [e.target.name]: e.target.value })
-          }
-          margin="normal"
-        />
+    <Box
+      sx={{
+        height: 'calc(100vh - 64px)',
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        background: `linear-gradient(to bottom right, #f9f7f4, #ffffff)`,
+        backgroundImage: `url(https://www.transparenttextures.com/patterns/paper-fibers.png)`,
+        backgroundRepeat: 'repeat',
+        px: 2,
+        pt: 8,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={3}
+          sx={{
+            p: { xs: 3, md: 5 },
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            borderRadius: 4,
+            backdropFilter: 'blur(6px)',
+            border: '1px solid #e0e0e0',
+            textAlign: 'center',
+          }}
+        >
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{ fontFamily: 'Playfair Display, serif', color: '#2f6c3a' }}
+          >
+            Registrace
+          </Typography>
 
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Registrovat{' '}
-        </Button>
-      </form>
-      <Typography variant="body2" sx={{ mt: 2 }}>
-        Už máš účet?
-        <Link to="/login" style={{ textDecoration: 'none', color: '#1976d2' }}>
-          Přihlas se
-        </Link>
-      </Typography>
-      {message && (
-        <Typography variant="body2" sx={{ mt: 2 }}>
-          {message}{' '}
-        </Typography>
-      )}
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Jméno"
+              name="name"
+              value={form.name}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="E-mail"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Heslo"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
+              margin="normal"
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{
+                mt: 2,
+                backgroundColor: '#2f6c3a',
+                '&:hover': { backgroundColor: '#265a32' },
+              }}
+            >
+              Registrovat
+            </Button>
+          </form>
+
+          <Typography variant="body2" sx={{ mt: 3 }}>
+            Už máš účet?{' '}
+            <Link
+              to="/login"
+              style={{
+                textDecoration: 'none',
+                color: '#2f6c3a',
+                fontWeight: 600,
+              }}
+            >
+              Přihlas se
+            </Link>
+          </Typography>
+
+          {message && (
+            <Typography variant="body2" sx={{ mt: 2, color: '#d32f2f' }}>
+              {message}
+            </Typography>
+          )}
+        </Paper>
+      </Container>
     </Box>
   );
 };

@@ -13,7 +13,6 @@ import {
   ListItemButton,
   ListItem,
 } from '@mui/material';
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -41,11 +40,25 @@ const Navbar = () => {
 
   return (
     <>
-      <AppBar position="static">
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="h6">
-            <Link to="/" style={{ color: '#fff', textDecoration: 'none' }}>
-              Rezervace
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: '#2f6c3a',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+        }}
+      >
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', py: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: '"Playfair Display", serif',
+              fontWeight: 600,
+              color: '#fff',
+              fontSize: '1.5rem',
+            }}
+          >
+            <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
+              Kosmetika Petra
             </Link>
           </Typography>
 
@@ -54,8 +67,19 @@ const Navbar = () => {
               <IconButton color="inherit" onClick={() => setOpen(true)}>
                 <MenuIcon />
               </IconButton>
-              <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
-                <List sx={{ width: 200 }}>
+              <Drawer
+                anchor="right"
+                open={open}
+                onClose={() => setOpen(false)}
+                PaperProps={{
+                  sx: {
+                    width: 220,
+                    backgroundColor: '#f9f7f4',
+                    p: 2,
+                  },
+                }}
+              >
+                <List>
                   {links.map((link) => (
                     <ListItem disablePadding key={link.text}>
                       <ListItemButton
@@ -78,10 +102,18 @@ const Navbar = () => {
               {links.map((link) => (
                 <Button
                   key={link.text}
-                  color="inherit"
                   component={Link}
                   to={link.to}
                   onClick={link.onClick}
+                  sx={{
+                    color: '#fff',
+                    border: '1px solid transparent',
+                    mx: 1,
+                    '&:hover': {
+                      borderColor: '#c8aa3d',
+                      backgroundColor: '#285a33',
+                    },
+                  }}
                 >
                   {link.text}
                 </Button>
@@ -93,4 +125,5 @@ const Navbar = () => {
     </>
   );
 };
+
 export default Navbar;
