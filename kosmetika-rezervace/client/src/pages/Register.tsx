@@ -5,26 +5,38 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import axios from 'axios';
 
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [message, setMessage] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.includes('@')) {
+    if (!form.email.includes('@')) {
       alert('Zadej platný e-mail');
       return;
     }
 
-    if (name.trim() === '') {
+    if (form.name.trim() === '') {
       alert('Zadej jméno');
       return;
     }
-
-    login(email, name); // ve skutečné appce by tu bylo volání backendu
-    navigate('/profile');
+    try {
+      // Pokud v index.ts máte app.use('/auth', authRoutes);
+      const response = await axios.post(
+        'http://localhost:5000/auth/register',
+        form,
+      );
+      setMessage(response.data.message);
+      login(form.email, form.name, form.password);
+      navigate('/profile');
+    } catch (error) {
+      console.error('Chyba při registraci:', error);
+      setMessage(
+        'Chyba při registraci. Zkontrolujte, že backend běží a endpoint je správný.',
+      );
+    }
   };
 
   return (
@@ -36,16 +48,33 @@ const Register = () => {
         <TextField
           fullWidth
           label="Jméno"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          name="name"
+          value={form.name}
+          onChange={(e) =>
+            setForm({ ...form, [e.target.name]: e.target.value })
+          }
           margin="normal"
         />
         <TextField
           fullWidth
           label="E-mail"
+          name="email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={form.email}
+          onChange={(e) =>
+            setForm({ ...form, [e.target.name]: e.target.value })
+          }
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          label="Password"
+          name="password"
+          type="password"
+          value={form.password}
+          onChange={(e) =>
+            setForm({ ...form, [e.target.name]: e.target.value })
+          }
           margin="normal"
         />
 
@@ -59,6 +88,11 @@ const Register = () => {
           Přihlas se
         </Link>
       </Typography>
+      {message && (
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          {message}{' '}
+        </Typography>
+      )}
     </Box>
   );
 };

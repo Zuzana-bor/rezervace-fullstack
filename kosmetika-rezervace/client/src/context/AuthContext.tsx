@@ -11,12 +11,13 @@ import {
 type User = {
   email: string;
   name: string;
+  password: string;
 };
 
 // 2️⃣ Typ pro hodnotu contextu
 type AuthContextType = {
   user: User | null;
-  login: (email: string, password: string) => void;
+  login: (name: string, email: string, password: string) => void;
   logout: () => void;
 };
 
@@ -44,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  const login = (email: string, name: string) => {
-    setUser({ email, name });
+  const login = (email: string, name: string, password: string) => {
+    setUser({ email, name, password });
   };
 
   const logout = () => {
