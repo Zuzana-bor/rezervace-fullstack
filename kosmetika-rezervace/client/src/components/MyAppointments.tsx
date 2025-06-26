@@ -26,6 +26,8 @@ const MyAppointments = () => {
         service: 'Masáž obličeje',
         price: 450,
       },
+     
+     
     ]);
   }, []);
 

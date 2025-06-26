@@ -33,9 +33,21 @@ const NewAppointment = () => {
         <MenuItem value="Masáž obličeje">Masáž obličeje</MenuItem>
       </TextField>
 
-      <Button variant="contained" onClick={handleSubmit}>
-        Objednat se
-      </Button>
+      <Button
+  type="submit"
+  variant="contained"
+  fullWidth
+  sx={{
+    mt: 2,
+    backgroundColor: '#2f6c3a',
+    color: '#fff',
+    '&:hover': {
+      backgroundColor: '#265a32',
+    },
+  }}
+>
+  Objednat se
+</Button>
     </Stack>
   );
 };

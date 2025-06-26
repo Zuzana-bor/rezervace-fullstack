@@ -34,7 +34,7 @@ export default function Home() {
             gutterBottom
             sx={{ fontFamily: 'Playfair Display, serif', color: '#2f6c3a' }}
           >
-            Vítejte v Kosmetice Petra Jamborová 🌿
+            Vítejte v  Petra Jamborová 🌿
           </Typography>
           <Typography
             variant="body1"
