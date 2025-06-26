@@ -12,25 +12,29 @@ import {
 } from '@mui/material';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+   const [form, setForm] = useState({ name: '', email: '', password: '' });
+  
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.includes('@')) {
+    if (!form.email.includes('@')) {
       alert('Zadej platný e-mail');
       return;
     }
 
-    if (name.trim() === '') {
+    if (form.name.trim() === '') {
       alert('Zadej jméno');
       return;
     }
+     if (form.password === '') {
+      alert('Zadej heslo');
+      return;
+    }
 
-    login(email, name);
+    login(form.email,form.name,form.password);
     navigate('/profile');
   };
 
@@ -71,16 +75,27 @@ const Login = () => {
             <TextField
               fullWidth
               label="Jméno"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              name="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, [e.target.name]: e.target.value })}
               margin="normal"
             />
             <TextField
               fullWidth
               label="E-mail"
+              name="email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={form.email}
+              onChange={(e) => setForm({...form,[e.target.name]:e.target.value})}
+              margin="normal"
+            />
+             <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={form.password}
+               onChange={(e) => setForm({...form,[e.target.name]:e.target.value})}
               margin="normal"
             />
             <Button

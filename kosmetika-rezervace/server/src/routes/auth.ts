@@ -1,7 +1,40 @@
 import express, { Request, Response } from 'express';
 import { User } from '../models/User';
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 const router = express.Router();
+
+router.post("/login", async(req,res)=>{
+  const{email, password}=req.body
+  try{
+    const user=await User.findOne({email})
+    if(!user){
+      return res.status(400).json({message:"Uživatel neexistuje"})
+    }
+    const isPasswordValid=await bcrypt.compare (password, user.password)
+    if(!isPasswordValid){
+      return res.status(400).json({message:"Špatné heslo"})
+    }
+    const token=jwt.sign(
+      {id:user._id, email:user.email, role:user.role},
+      process.env.JWT_SECRET|| 'tajnyklic', // Pro vývoj
+      {expiresIn:"1d"}
+    )
+    res.json({
+      token,
+      user:{
+        id:user._id,
+        email: user.email,
+        name:user.name,
+        role:user.role,
+      },
+    })
+  }catch(err){
+    console.error(err)
+    res.status(500).json({message:"Něco se pokazilo na serveru"})
+  }
+})
 
 router.post('/register', async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
