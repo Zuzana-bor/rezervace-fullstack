@@ -1,5 +1,7 @@
 import { List, ListItem, ListItemText } from '@mui/material';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 type Appointment = {
   _id: string;
@@ -10,25 +12,29 @@ type Appointment = {
 
 const MyAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [error, setError] = useState('');
+  const { token } = useAuth(); // získáme token
 
   useEffect(() => {
-    // TODO: nahradit fetch z backendu
-    setAppointments([
-      {
-        _id: '1',
-        date: '2025-07-01T14:00',
-        service: 'Kosmetika – hloubkové čištění',
-        price: 800,
-      },
-      {
-        _id: '2',
-        date: '2025-07-15T09:30',
-        service: 'Masáž obličeje',
-        price: 450,
-      },
-     
-     
-    ]);
+    const fetchAppointments = async () => {
+      try {
+        const token = localStorage.getItem('token'); // 👈 ujisti se, že token existuje
+        const res = await axios.get(
+          'http://localhost:5000/api/appointments/me',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        setAppointments(res.data);
+      } catch (err: any) {
+        setError(err.message);
+        console.error('Chyba při načítání:', err);
+      }
+    };
+
+    fetchAppointments();
   }, []);
 
   return (

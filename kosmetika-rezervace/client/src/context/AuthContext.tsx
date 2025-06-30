@@ -15,9 +15,10 @@ type User = {
 };
 
 // 2️⃣ Typ pro hodnotu contextu
-type AuthContextType = {
+export type AuthContextType = {
   user: User | null;
-  login: (name: string, email: string, password: string) => void;
+  token: string | null;
+  login: (userData: User, token: string) => void;
   logout: () => void;
 };
 
@@ -27,16 +28,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // 4️⃣ Provider komponenta
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  // Načti uživatele z localStorage při načtení
+  // Načti uživatele a token z localStorage při načtení
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    if (storedToken) {
+      setToken(storedToken);
+    }
   }, []);
 
-  // Ulož do localStorage při změně
+  // Ulož uživatele a token do localStorage při změně
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -45,16 +51,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  const login = (email: string, name: string, password: string) => {
-    setUser({ email, name, password });
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }, [token]);
+
+  const login = (userData: User, token: string) => {
+    setUser(userData);
+    setToken(token);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

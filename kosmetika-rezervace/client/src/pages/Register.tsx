@@ -33,15 +33,22 @@ const Register = () => {
     try {
       const response = await axios.post(
         'http://localhost:5000/auth/register',
-        form
+        form,
       );
       setMessage(response.data.message);
-      login(form.email, form.name, form.password);
+      login(
+        {
+          email: form.email,
+          name: form.name,
+          password: '',
+        },
+        response.data.token,
+      );
       navigate('/profile');
     } catch (error) {
       console.error('Chyba při registraci:', error);
       setMessage(
-        'Chyba při registraci. Zkontrolujte, že backend běží a endpoint je správný.'
+        'Chyba při registraci. Zkontrolujte, že backend běží a endpoint je správný.',
       );
     }
   };

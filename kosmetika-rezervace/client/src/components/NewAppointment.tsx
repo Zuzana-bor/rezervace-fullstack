@@ -1,14 +1,34 @@
 // src/components/NewAppointment.tsx
 import { Button, MenuItem, TextField, Stack } from '@mui/material';
 import { useState } from 'react';
+import axios from 'axios';
 
 const NewAppointment = () => {
   const [date, setDate] = useState('');
   const [service, setService] = useState('');
+  const [price, setPrice] = useState('');
 
-  const handleSubmit = () => {
-    console.log('Nová rezervace:', { date, service });
-    // TODO: odeslat na backend
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        'http://localhost:5000/appointments',
+        { date, service, price },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      alert('Objednávka byla úspěšně vytvořena!');
+      setDate('');
+      setService('');
+      setPrice('');
+    } catch (err) {
+      console.error('Chyba při odesílání objednávky:', err);
+      alert('Chyba při vytváření objednávky');
+    }
   };
 
   return (
@@ -34,20 +54,20 @@ const NewAppointment = () => {
       </TextField>
 
       <Button
-  type="submit"
-  variant="contained"
-  fullWidth
-  sx={{
-    mt: 2,
-    backgroundColor: '#2f6c3a',
-    color: '#fff',
-    '&:hover': {
-      backgroundColor: '#265a32',
-    },
-  }}
->
-  Objednat se
-</Button>
+        type="submit"
+        variant="contained"
+        fullWidth
+        sx={{
+          mt: 2,
+          backgroundColor: '#2f6c3a',
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: '#265a32',
+          },
+        }}
+      >
+        Objednat se
+      </Button>
     </Stack>
   );
 };
