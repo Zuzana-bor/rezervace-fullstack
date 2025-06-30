@@ -8,14 +8,27 @@ export type Appointment = {
   price: number;
 };
 
-export const getMyAppointments = async (): Promise<Appointment[]> => {
-  const res = await axios.get('/api/appointments/me');
-  console.log('API odpověď:', res.data);
+// Pomocná funkce pro získání tokenu
+function getToken() {
+  return localStorage.getItem('token');
+}
 
-  // Zde jedna z možností:
-  return res.data.appointments; // NEBO přímo res.data pokud je to pole
+export const getMyAppointments = async (): Promise<Appointment[]> => {
+  const token = getToken();
+  const res = await axios.get('/api/appointments/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  console.log('API odpověď:', res.data);
+  return Array.isArray(res.data) ? res.data : res.data.appointments;
 };
 
 export const deleteAppointment = async (id: string): Promise<void> => {
-  await axios.delete(`/api/appointments/${id}`);
+  const token = getToken();
+  await axios.delete(`/api/appointments/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

@@ -22,16 +22,28 @@ export const requireAuth = (
   const auth = req.headers.authorization;
 
   if (!auth?.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Chybí token' });
+    console.warn('Authorization header missing or malformed:', auth);
+    return res
+      .status(401)
+      .json({ message: 'Chybí token v hlavičce Authorization' });
   }
 
   const token = auth.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as UserPayload;
+    const secret = process.env.JWT_SECRET || 'tajnyklic';
+    if (!process.env.JWT_SECRET) {
+      console.warn(
+        'Používá se výchozí JWT_SECRET! Nastavte proměnnou prostředí JWT_SECRET pro produkci.',
+      );
+    }
+    const decoded = jwt.verify(token, secret) as UserPayload;
     req.user = decoded;
     next();
-  } catch (err) {
-    return res.status(403).json({ message: 'Neplatný token' });
+  } catch (err: any) {
+    console.error('Chyba při ověřování tokenu:', err.message);
+    return res
+      .status(403)
+      .json({ message: 'Neplatný token', error: err.message });
   }
 };

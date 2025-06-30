@@ -30,7 +30,13 @@ const Register = () => {
       return;
     }
 
+    if (form.password.trim() === '') {
+      alert('Zadej heslo');
+      return;
+    }
+
     try {
+      console.log('Odesílám data:', form); // Debug: vypiš odesílaná data
       const response = await axios.post(
         'http://localhost:5000/auth/register',
         form,

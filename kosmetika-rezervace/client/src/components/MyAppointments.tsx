@@ -1,7 +1,4 @@
 import { List, ListItem, ListItemText } from '@mui/material';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
 
 type Appointment = {
   _id: string;
@@ -10,32 +7,15 @@ type Appointment = {
   price: number;
 };
 
-const MyAppointments = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [error, setError] = useState('');
-  const { token } = useAuth(); // získáme token
+interface MyAppointmentsProps {
+  appointments: Appointment[];
+  error: string;
+}
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const token = localStorage.getItem('token'); // 👈 ujisti se, že token existuje
-        const res = await axios.get(
-          'http://localhost:5000/api/appointments/me',
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        setAppointments(res.data);
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Chyba při načítání:', err);
-      }
-    };
-
-    fetchAppointments();
-  }, []);
+const MyAppointments = ({ appointments, error }: MyAppointmentsProps) => {
+  if (error) {
+    return <div style={{ color: 'red' }}>{error}</div>;
+  }
 
   return (
     <List>

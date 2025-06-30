@@ -1,4 +1,3 @@
-
 import { useAuth } from '../context/AuthContext';
 import {
   Container,
@@ -8,11 +7,31 @@ import {
   Button,
   Divider,
 } from '@mui/material';
+import { useEffect, useState } from 'react';
 import MyAppointments from '../components/MyAppointments';
 import NewAppointment from '../components/NewAppointment';
 
 const Profile = () => {
   const { user, logout } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState('');
+
+  // Funkce pro načtení rezervací
+  const refreshAppointments = async () => {
+    try {
+      const data = await import('../api/appointments').then((m) =>
+        m.getMyAppointments(),
+      );
+      setAppointments(data);
+      setError('');
+    } catch (err) {
+      setError('Chyba při načítání rezervací. Jste přihlášeni?');
+    }
+  };
+
+  useEffect(() => {
+    refreshAppointments();
+  }, []);
 
   if (!user) {
     return (
@@ -125,7 +144,7 @@ const Profile = () => {
             >
               Moje rezervace
             </Typography>
-            <MyAppointments />
+            <MyAppointments appointments={appointments} error={error} />
           </Box>
 
           <Divider sx={{ my: 2 }} />
@@ -138,7 +157,7 @@ const Profile = () => {
             >
               Nová rezervace
             </Typography>
-            <NewAppointment />
+            <NewAppointment onCreated={refreshAppointments} />
           </Box>
         </Paper>
       </Container>

@@ -10,32 +10,43 @@ import {
   Container,
   Paper,
 } from '@mui/material';
+import axios from 'axios';
 
 const Login = () => {
-   const [form, setForm] = useState({ name: '', email: '', password: '' });
-  
+  const [form, setForm] = useState({ email: '', password: '' });
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!form.email.includes('@')) {
       alert('Zadej platný e-mail');
       return;
     }
-
-    if (form.name.trim() === '') {
-      alert('Zadej jméno');
-      return;
-    }
-     if (form.password === '') {
+    if (form.password === '') {
       alert('Zadej heslo');
       return;
     }
-
-    login(form.email,form.name,form.password);
-    navigate('/profile');
+    try {
+      const response = await axios.post('http://localhost:5000/auth/login', {
+        email: form.email,
+        password: form.password,
+      });
+      // Uložit uživatele a token do AuthContextu
+      login(
+        {
+          email: response.data.user.email,
+          name: response.data.user.name,
+          password: '', // heslo neukládejte
+        },
+        response.data.token,
+      );
+      navigate('/profile');
+    } catch (error) {
+      alert('Chyba při přihlášení. Zkontrolujte e-mail a heslo.');
+    }
   };
 
   return (
@@ -74,28 +85,24 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="Jméno"
-              name="name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, [e.target.name]: e.target.value })}
-              margin="normal"
-            />
-            <TextField
-              fullWidth
               label="E-mail"
               name="email"
               type="email"
               value={form.email}
-              onChange={(e) => setForm({...form,[e.target.name]:e.target.value})}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
               margin="normal"
             />
-             <TextField
+            <TextField
               fullWidth
-              label="Password"
+              label="Heslo"
               name="password"
               type="password"
               value={form.password}
-               onChange={(e) => setForm({...form,[e.target.name]:e.target.value})}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
               margin="normal"
             />
             <Button
