@@ -41,8 +41,7 @@ router.post('/me', requireAuth, async (req, res) => {
     const saved = await appointment.save();
     console.log('ULOŽENO:', saved);
     // Výpis všech rezervací pro kontrolu
-    const all = await Appointment.find({});
-    console.log('VŠECHNY REZERVACE:', all);
+
     res.status(201).json(saved);
   } catch (err: any) {
     console.error('Chyba při vytváření rezervace:', err);
