@@ -5,6 +5,7 @@ Moderní rezervační systém pro kosmetické služby. Postaveno na stacku React
 ---
 
 ## Funkce
+
 - Registrace a přihlášení uživatele (JWT autentizace)
 - Vytváření a správa rezervací (propojeno s uživatelem)
 - Okamžité zobrazení rezervací po vytvoření
@@ -22,6 +23,7 @@ kosmetika-rezervace/
 ```
 
 ### Backend (`server/`)
+
 - `src/index.ts` – start serveru, připojení k DB, registrace rout
 - `src/models/User.ts` – schéma uživatele
 - `src/models/Appointments.ts` – schéma rezervace
@@ -30,6 +32,7 @@ kosmetika-rezervace/
 - `src/middleware/auth.ts` – ověření JWT
 
 ### Frontend (`client/`)
+
 - `src/pages/Profile.tsx` – hlavní stránka uživatele
 - `src/components/MyAppointments.tsx` – výpis rezervací
 - `src/components/NewAppointment.tsx` – formulář pro novou rezervaci
@@ -41,6 +44,7 @@ kosmetika-rezervace/
 ## Jak spustit projekt
 
 ### 1. MongoDB
+
 - Spusťte lokální MongoDB nebo použijte MongoDB Atlas.
 - Vytvořte soubor `.env` v `server/` a nastavte proměnné:
   ```
@@ -49,6 +53,7 @@ kosmetika-rezervace/
   ```
 
 ### 2. Backend
+
 ```bash
 cd server
 npm install
@@ -56,6 +61,7 @@ npm run dev
 ```
 
 ### 3. Frontend
+
 ```bash
 cd client
 npm install
@@ -67,6 +73,7 @@ Frontend poběží na http://localhost:5173, backend na http://localhost:5000.
 ---
 
 ## Uživatelské scénáře
+
 - **Registrace:** Vyplňte jméno, email, heslo. Po registraci jste automaticky přihlášeni.
 - **Přihlášení:** Zadejte email a heslo. Po přihlášení můžete spravovat své rezervace.
 - **Nová rezervace:** Vyberte službu a datum, odešlete formulář. Rezervace se ihned zobrazí v seznamu.
@@ -75,6 +82,7 @@ Frontend poběží na http://localhost:5173, backend na http://localhost:5000.
 ---
 
 ## Technologie
+
 - **Frontend:** React, TypeScript, Material UI, Axios
 - **Backend:** Node.js, Express, TypeScript, JWT, Mongoose
 - **DB:** MongoDB
@@ -82,6 +90,7 @@ Frontend poběží na http://localhost:5173, backend na http://localhost:5000.
 ---
 
 ## Vývojářské tipy
+
 - Pro úpravy backendu sledujte logy v terminálu.
 - Pro úpravy frontendu používejte React DevTools.
 - Pro správu dat použijte MongoDB Compass.
@@ -89,4 +98,5 @@ Frontend poběží na http://localhost:5173, backend na http://localhost:5000.
 ---
 
 ## Autor
+
 - Vytvořeno pro studijní účely. Moderní fullstack architektura.
