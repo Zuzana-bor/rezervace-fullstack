@@ -32,11 +32,12 @@ export const requireAuth = (
   const token = auth.split(' ')[1];
 
   try {
-    const secret = process.env.JWT_SECRET || 'tajnyklic';
-    if (!process.env.JWT_SECRET) {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
       console.warn(
-        'Používá se výchozí JWT_SECRET! Nastavte proměnnou prostředí JWT_SECRET pro produkci.',
+        'JWT_SECRET není nastaven! Nastavte proměnnou prostředí JWT_SECRET pro produkci.',
       );
+      return res.status(500).json({ message: 'Chybí JWT_SECRET na serveru.' });
     }
     const decoded = jwt.verify(token, secret) as UserPayload;
     req.user = decoded;
