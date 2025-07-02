@@ -11,23 +11,21 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
   res.json(times);
 });
 
-// Přidat blokovaný čas
+// Přidat blokovaný čas (interval nebo celý den)
 router.post('/', requireAuth, requireAdmin, async (req, res) => {
-  const { date, note } = req.body;
-  if (!date) {
-    return res.status(400).json({ message: 'Datum je povinné.' });
+  const { start, end, allDay, note } = req.body;
+  if (!start || !end) {
+    return res.status(400).json({ message: 'Začátek a konec jsou povinné.' });
   }
   try {
-    const blocked = new BlockedTime({ date, note });
+    const blocked = new BlockedTime({ start, end, allDay: !!allDay, note });
     await blocked.save();
     res.status(201).json(blocked);
   } catch (err: any) {
-    res
-      .status(400)
-      .json({
-        message: 'Chyba při vytváření blokovaného času',
-        error: err.message,
-      });
+    res.status(400).json({
+      message: 'Chyba při vytváření blokovaného času',
+      error: err.message,
+    });
   }
 });
 
@@ -39,12 +37,10 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Blokovaný čas nenalezen' });
     res.json({ message: 'Blokovaný čas smazán' });
   } catch (err: any) {
-    res
-      .status(400)
-      .json({
-        message: 'Chyba při mazání blokovaného času',
-        error: err.message,
-      });
+    res.status(400).json({
+      message: 'Chyba při mazání blokovaného času',
+      error: err.message,
+    });
   }
 });
 

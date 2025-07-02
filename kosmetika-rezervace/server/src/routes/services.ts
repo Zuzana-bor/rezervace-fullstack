@@ -6,19 +6,21 @@ import { Service } from '../models/Service';
 const router = express.Router();
 
 // Získat všechny služby
-router.get('/', requireAuth, requireAdmin, async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   const services = await Service.find();
   res.json(services);
 });
 
 // Přidat novou službu
 router.post('/', requireAuth, requireAdmin, async (req, res) => {
-  const { name, price } = req.body;
-  if (!name || !price) {
-    return res.status(400).json({ message: 'Jméno a cena jsou povinné.' });
+  const { name, price, duration } = req.body;
+  if (!name || !price || !duration) {
+    return res
+      .status(400)
+      .json({ message: 'Jméno, cena a délka jsou povinné.' });
   }
   try {
-    const service = new Service({ name, price });
+    const service = new Service({ name, price, duration });
     await service.save();
     res.status(201).json(service);
   } catch (err: any) {
@@ -30,11 +32,11 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
 // Upravit službu
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
-  const { name, price } = req.body;
+  const { name, price, duration } = req.body;
   try {
     const service = await Service.findByIdAndUpdate(
       req.params.id,
-      { name, price },
+      { name, price, duration },
       { new: true },
     );
     if (!service) return res.status(404).json({ message: 'Služba nenalezena' });

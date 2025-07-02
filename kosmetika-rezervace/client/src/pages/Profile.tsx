@@ -57,7 +57,7 @@ const Profile = () => {
 
   // Pokud je admin, zobraz dashboard
   if (user.role === 'admin') {
-    return <AdminDashboard users={[]} />;
+    return <AdminDashboard />;
   }
 
   return (

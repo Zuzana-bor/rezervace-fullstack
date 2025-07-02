@@ -1,7 +1,10 @@
 // src/components/NewAppointment.tsx
-import { Button, MenuItem, TextField, Stack } from '@mui/material';
-import { useState } from 'react';
+import { Button, MenuItem, TextField, Stack, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getAllServices, Service } from '../api/services';
+import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
+import { getAllAppointments, Appointment as AnyAppointment } from '../api/appointmentsAll';
 
 interface NewAppointmentProps {
   onCreated: () => void;
@@ -10,6 +13,29 @@ interface NewAppointmentProps {
 const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
   const [date, setDate] = useState('');
   const [service, setService] = useState('');
+  const [services, setServices] = useState<Service[]>([]);
+  const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
+  const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
+  const [allAppointments, setAllAppointments] = useState<AnyAppointment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      getAllServices(),
+      getBlockedTimes(),
+      getAllAppointments(),
+    ]).then(([services, blocked, appointments]) => {
+      setServices(services);
+      setBlockedTimes(blocked);
+      setAllAppointments(appointments);
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    const found = services.find((s) => s._id === service);
+    setSelectedPrice(found ? found.price : null);
+  }, [service, services]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +69,15 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
           value={date}
           onChange={(e) => setDate(e.target.value)}
           InputLabelProps={{ shrink: true }}
+          error={isBlocked(date) || isOccupied(date)}
+          helperText={
+            isBlocked(date)
+              ? 'Tento termín je blokovaný.'
+              : isOccupied(date)
+              ? 'Tento termín je obsazený.'
+              : ''
+          }
+          disabled={loading}
         />
 
         <TextField
@@ -51,12 +86,17 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
           value={service}
           onChange={(e) => setService(e.target.value)}
         >
-          <MenuItem value="Kosmetika – hloubkové čištění">
-            Kosmetika – hloubkové čištění
-          </MenuItem>
-          <MenuItem value="Masáž obličeje">Masáž obličeje</MenuItem>
+          {services.map((s) => (
+            <MenuItem key={s._id} value={s._id}>
+              {s.name} ({s.price} Kč)
+            </MenuItem>
+          ))}
         </TextField>
-
+        {selectedPrice !== null && (
+          <Typography sx={{ color: '#2f6c3a', fontWeight: 600 }}>
+            Cena: {selectedPrice} Kč
+          </Typography>
+        )}
         <Button
           type="submit"
           variant="contained"
@@ -76,5 +116,35 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
     </form>
   );
 };
+
+// Pomocné funkce pro blokování a obsazenost
+function isBlocked(dateStr: string) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  // Víkend
+  if (d.getDay() === 0 || d.getDay() === 6) return true;
+  // Blokované intervaly
+  return blockedTimes.some((b) => {
+    const start = new Date(b.start);
+    const end = new Date(b.end);
+    if (b.allDay) {
+      // Blokace na celý den
+      return (
+        d >= new Date(start.setHours(0, 0, 0, 0)) &&
+        d <= new Date(end.setHours(23, 59, 59, 999))
+      );
+    }
+    return d >= start && d < end;
+  });
+}
+function isOccupied(dateStr: string) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  return allAppointments.some((a) => {
+    const start = new Date(a.date);
+    const end = new Date(start.getTime() + (a.duration || 60) * 60000);
+    return d >= start && d < end;
+  });
+}
 
 export default NewAppointment;

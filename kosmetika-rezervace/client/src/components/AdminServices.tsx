@@ -17,6 +17,7 @@ const AdminServices = () => {
   const [services, setServices] = useState([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [duration, setDuration] = useState('');
 
   const fetchServices = () => {
     const token = localStorage.getItem('token');
@@ -33,11 +34,12 @@ const AdminServices = () => {
     const token = localStorage.getItem('token');
     await axios.post(
       '/api/services',
-      { name, price: Number(price) },
+      { name, price: Number(price), duration: Number(duration) },
       { headers: { Authorization: `Bearer ${token}` } },
     );
     setName('');
     setPrice('');
+    setDuration('');
     fetchServices();
   };
 
@@ -60,6 +62,7 @@ const AdminServices = () => {
             <TableRow>
               <TableCell>Název</TableCell>
               <TableCell>Cena</TableCell>
+              <TableCell>Délka</TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -68,6 +71,7 @@ const AdminServices = () => {
               <TableRow key={s._id}>
                 <TableCell>{s.name}</TableCell>
                 <TableCell>{s.price} Kč</TableCell>
+                <TableCell>{s.duration} min</TableCell>
                 <TableCell>
                   <Button color="error" onClick={() => handleDelete(s._id)}>
                     Smazat
@@ -94,10 +98,17 @@ const AdminServices = () => {
         type="number"
         sx={{ mr: 2 }}
       />
+      <TextField
+        label="Délka (min)"
+        value={duration}
+        onChange={(e) => setDuration(e.target.value)}
+        type="number"
+        sx={{ mr: 2 }}
+      />
       <Button
         variant="contained"
         onClick={handleAdd}
-        disabled={!name || !price}
+        disabled={!name || !price || !duration}
       >
         Přidat
       </Button>
