@@ -20,7 +20,6 @@ export const getMyAppointments = async (): Promise<Appointment[]> => {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log('API odpověď:', res.data);
   return Array.isArray(res.data) ? res.data : res.data.appointments;
 };
 

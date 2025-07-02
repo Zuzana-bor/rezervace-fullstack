@@ -13,7 +13,7 @@ function getToken() {
 
 export const getUsers = async () => {
   const token = getToken();
-  const res = await axiosInstance.get('/users', {
+  const res = await axiosInstance.get('/admin/users', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
