@@ -5,8 +5,8 @@ import { BlockedTime } from '../models/BlockedTime';
 
 const router = express.Router();
 
-// Získat všechny blokované časy
-router.get('/', requireAuth, async (req, res) => {
+// Získat všechny blokované časy (veřejné)
+router.get('/', async (req, res) => {
   const times = await BlockedTime.find();
   res.json(times);
 });

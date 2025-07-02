@@ -5,8 +5,8 @@ import { Service } from '../models/Service';
 
 const router = express.Router();
 
-// Získat všechny služby
-router.get('/', requireAuth, async (req, res) => {
+// Získat všechny služby (veřejné)
+router.get('/', async (req, res) => {
   const services = await Service.find();
   res.json(services);
 });
