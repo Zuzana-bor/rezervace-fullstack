@@ -15,7 +15,7 @@ function getToken() {
 
 export const getAllAppointments = async (): Promise<Appointment[]> => {
   const token = getToken();
-  const res = await axiosInstance.get('/appointments/all', {
+  const res = await axiosInstance.get('/admin/appointments', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
