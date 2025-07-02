@@ -12,18 +12,13 @@ import {
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
-import axios from 'axios';
+import { getUsers } from '../api/users';
 
 const AdminClients = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    axios
-      .get('/api/admin/users', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => setUsers(r.data.filter((u: any) => u.role === 'user')));
+    getUsers().then((data) => setUsers(data.filter((u: any) => u.role === 'user')));
   }, []);
 
   return (
