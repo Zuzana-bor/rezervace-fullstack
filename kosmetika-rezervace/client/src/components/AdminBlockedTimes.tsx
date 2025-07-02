@@ -11,6 +11,7 @@ import {
   Button,
   TextField,
 } from '@mui/material';
+import { getBlockedTimes } from '../api/blockedTimes';
 import axios from 'axios';
 
 const AdminBlockedTimes = () => {
@@ -21,12 +22,7 @@ const AdminBlockedTimes = () => {
   const [note, setNote] = useState('');
 
   const fetchTimes = () => {
-    const token = localStorage.getItem('token');
-    axios
-      .get('/api/blocked-times', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => setTimes(r.data));
+    getBlockedTimes().then(setTimes);
   };
 
   useEffect(() => {

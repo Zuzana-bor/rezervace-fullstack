@@ -1,13 +1,10 @@
 // src/components/NewAppointment.tsx
 import { Button, MenuItem, TextField, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { getServices, Service } from '../api/services';
 import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
-import {
-  getAllAppointments,
-  Appointment as AnyAppointment,
-} from '../api/appointmentsAll';
+import { getAllAppointments, Appointment as AnyAppointment } from '../api/appointmentsAll';
+import axios from 'axios';
 
 interface NewAppointmentProps {
   onCreated: () => void;

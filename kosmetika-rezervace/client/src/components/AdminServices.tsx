@@ -11,6 +11,7 @@ import {
   Button,
   TextField,
 } from '@mui/material';
+import { getServices } from '../api/services';
 import axios from 'axios';
 
 const AdminServices = () => {
@@ -20,10 +21,7 @@ const AdminServices = () => {
   const [duration, setDuration] = useState('');
 
   const fetchServices = () => {
-    const token = localStorage.getItem('token');
-    axios
-      .get('/api/services', { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => setServices(r.data));
+    getServices().then(setServices);
   };
 
   useEffect(() => {

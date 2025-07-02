@@ -4,32 +4,33 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import axios from 'axios';
+import { getAllAppointments } from '../api/appointmentsAll';
 
 interface AdminCalendarProps {
   onEventClick?: (event: any) => void;
 }
 
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+}
+
 const AdminCalendar = ({ onEventClick }: AdminCalendarProps) => {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [rawEvents, setRawEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    axios
-      .get('/api/admin/appointments', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => {
-        setRawEvents(r.data);
-        setEvents(
-          r.data.map((a: any) => ({
-            id: a._id,
-            title: `${a.service} – ${a.userId?.name || ''}`,
-            start: a.date,
-          })),
-        );
-      });
+    getAllAppointments().then((r) => {
+      setRawEvents(r);
+      setEvents(
+        r.map((a: any) => ({
+          id: a._id,
+          title: `${a.service} – ${a.userId?.name || ''}`,
+          start: a.date,
+        })),
+      );
+    });
   }, []);
 
   return (

@@ -1,3 +1,5 @@
+import { getMyAppointments } from '../api/appointments';
+import { useEffect, useState } from 'react';
 import { List, ListItem, ListItemText } from '@mui/material';
 
 type Appointment = {
@@ -8,11 +10,20 @@ type Appointment = {
 };
 
 interface MyAppointmentsProps {
-  appointments: Appointment[];
-  error: string;
+  appointments?: Appointment[];
+  error?: string;
 }
 
-const MyAppointments = ({ appointments, error }: MyAppointmentsProps) => {
+const MyAppointments = ({ appointments: propAppointments, error: propError }: MyAppointmentsProps) => {
+  const [appointments, setAppointments] = useState<Appointment[]>(propAppointments || []);
+  const [error, setError] = useState<string>(propError || '');
+
+  useEffect(() => {
+    getMyAppointments()
+      .then(setAppointments)
+      .catch((e) => setError('Chyba při načítání rezervací'));
+  }, []);
+
   if (error) {
     return <div style={{ color: 'red' }}>{error}</div>;
   }
