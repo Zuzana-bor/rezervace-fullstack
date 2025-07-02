@@ -8,10 +8,11 @@ import {
 } from 'react';
 
 // Typ pro uživatele
-type User = {
+export type User = {
   email: string;
   name: string;
-  password: string;
+  password?: string;
+  role?: string;
 };
 
 // 2️⃣ Typ pro hodnotu contextu

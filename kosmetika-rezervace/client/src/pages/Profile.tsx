@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   Container,
@@ -7,13 +8,16 @@ import {
   Button,
   Divider,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
 import MyAppointments from '../components/MyAppointments';
 import NewAppointment from '../components/NewAppointment';
+import AdminDashboard from '../components/AdminDashboard';
+
+// Import the Appointment type from the API to ensure type compatibility
+import type { Appointment } from '../api/appointments';
 
 const Profile = () => {
   const { user, logout } = useAuth();
-  const [appointments, setAppointments] = useState([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [error, setError] = useState('');
 
   // Funkce pro načtení rezervací
@@ -49,6 +53,11 @@ const Profile = () => {
         <Typography variant="h6">Nejsi přihlášená.</Typography>
       </Box>
     );
+  }
+
+  // Pokud je admin, zobraz dashboard
+  if (user.role === 'admin') {
+    return <AdminDashboard users={[]} />;
   }
 
   return (

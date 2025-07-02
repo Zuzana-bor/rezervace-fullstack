@@ -39,7 +39,7 @@ const Login = () => {
         {
           email: response.data.user.email,
           name: response.data.user.name,
-          password: '', // heslo neukládejte
+          role: response.data.user.role,
         },
         response.data.token,
       );
