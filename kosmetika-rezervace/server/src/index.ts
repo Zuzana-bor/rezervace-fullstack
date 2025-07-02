@@ -12,7 +12,12 @@ import adminAppointmentsRouter from './routes/adminAppointments';
 import adminUsersRouter from './routes/adminUsers';
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: 'https://kosmetika-lhota.vercel.app',
+    credentials: true,
+  }),
+);
 const PORT = 5000;
 
 app.use(express.json());
