@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosInstance from './axios';
 
 export type Appointment = {
   _id: string;
@@ -8,12 +8,17 @@ export type Appointment = {
   duration?: number;
 };
 
-export async function getAllAppointments(): Promise<Appointment[]> {
-  const token = localStorage.getItem('token');
-  const res = await axios.get('/api/appointments', {
+// Pomocná funkce pro získání tokenu
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+export const getAllAppointments = async (): Promise<Appointment[]> => {
+  const token = getToken();
+  const res = await axiosInstance.get('/appointments/all', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  return res.data;
-}
+  return Array.isArray(res.data) ? res.data : res.data.appointments;
+};

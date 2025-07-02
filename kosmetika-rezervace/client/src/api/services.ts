@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosInstance from './axios';
 
 export type Service = {
   _id: string;
@@ -7,11 +7,7 @@ export type Service = {
   duration: number; // délka služby v minutách
 };
 
-export async function getAllServices(): Promise<Service[]> {
-  const res = await axios.get('/api/services', {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
+export const getServices = async () => {
+  const res = await axiosInstance.get('/services');
   return res.data;
-}
+};

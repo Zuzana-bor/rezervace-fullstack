@@ -1,5 +1,5 @@
 // src/api/appointments.ts
-import axios from 'axios';
+import axiosInstance from './axios';
 
 export type Appointment = {
   _id: string;
@@ -15,7 +15,7 @@ function getToken() {
 
 export const getMyAppointments = async (): Promise<Appointment[]> => {
   const token = getToken();
-  const res = await axios.get('/api/appointments/me', {
+  const res = await axiosInstance.get('/appointments/me', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -26,7 +26,7 @@ export const getMyAppointments = async (): Promise<Appointment[]> => {
 
 export const deleteAppointment = async (id: string): Promise<void> => {
   const token = getToken();
-  await axios.delete(`/api/appointments/${id}`, {
+  await axiosInstance.delete(`/appointments/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -2,7 +2,7 @@
 import { Button, MenuItem, TextField, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { getAllServices, Service } from '../api/services';
+import { getServices, Service } from '../api/services';
 import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
 import {
   getAllAppointments,
@@ -53,16 +53,14 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      getAllServices(),
-      getBlockedTimes(),
-      getAllAppointments(),
-    ]).then(([services, blocked, appointments]) => {
-      setServices(services);
-      setBlockedTimes(blocked);
-      setAllAppointments(appointments);
-      setLoading(false);
-    });
+    Promise.all([getServices(), getBlockedTimes(), getAllAppointments()]).then(
+      ([services, blocked, appointments]) => {
+        setServices(services);
+        setBlockedTimes(blocked);
+        setAllAppointments(appointments);
+        setLoading(false);
+      },
+    );
   }, []);
 
   useEffect(() => {

@@ -1,3 +1,5 @@
+import axiosInstance from './axios';
+
 export type User = {
   _id: string;
   name: string;
@@ -5,13 +7,16 @@ export type User = {
   role: string;
 };
 
-export async function getAllUsers(): Promise<User[]> {
-  const token = localStorage.getItem('token');
-  const response = await fetch('/api/admin/users', {
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+export const getUsers = async () => {
+  const token = getToken();
+  const res = await axiosInstance.get('/users', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  if (!response.ok) throw new Error('Chyba při načítání uživatelů');
-  return await response.json();
-}
+  return res.data;
+};

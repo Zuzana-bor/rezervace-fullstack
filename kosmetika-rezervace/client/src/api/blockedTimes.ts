@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axiosInstance from './axios';
 
 export type BlockedTime = {
   _id: string;
@@ -8,12 +8,16 @@ export type BlockedTime = {
   note?: string;
 };
 
-export async function getBlockedTimes(): Promise<BlockedTime[]> {
-  const token = localStorage.getItem('token');
-  const res = await axios.get('/api/blocked-times', {
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+export const getBlockedTimes = async () => {
+  const token = getToken();
+  const res = await axiosInstance.get('/blocked-times', {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
   return res.data;
-}
+};
