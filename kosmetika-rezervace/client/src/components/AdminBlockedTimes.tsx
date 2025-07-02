@@ -70,8 +70,12 @@ const AdminBlockedTimes = () => {
           <TableBody>
             {times.map((b: any) => (
               <TableRow key={b._id}>
-                <TableCell>{b.allDay ? 'Celý den' : new Date(b.start).toLocaleString()}</TableCell>
-                <TableCell>{b.allDay ? 'Celý den' : new Date(b.end).toLocaleString()}</TableCell>
+                <TableCell>
+                  {b.allDay ? 'Celý den' : new Date(b.start).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  {b.allDay ? 'Celý den' : new Date(b.end).toLocaleString()}
+                </TableCell>
                 <TableCell>{b.allDay ? 'Ano' : 'Ne'}</TableCell>
                 <TableCell>{b.note}</TableCell>
                 <TableCell>

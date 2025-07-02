@@ -14,8 +14,13 @@ interface MyAppointmentsProps {
   error?: string;
 }
 
-const MyAppointments = ({ appointments: propAppointments, error: propError }: MyAppointmentsProps) => {
-  const [appointments, setAppointments] = useState<Appointment[]>(propAppointments || []);
+const MyAppointments = ({
+  appointments: propAppointments,
+  error: propError,
+}: MyAppointmentsProps) => {
+  const [appointments, setAppointments] = useState<Appointment[]>(
+    propAppointments || [],
+  );
   const [error, setError] = useState<string>(propError || '');
 
   useEffect(() => {

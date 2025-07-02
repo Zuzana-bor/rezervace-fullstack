@@ -18,7 +18,9 @@ const AdminClients = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    getUsers().then((data) => setUsers(data.filter((u: any) => u.role === 'user')));
+    getUsers().then((data) =>
+      setUsers(data.filter((u: any) => u.role === 'user')),
+    );
   }, []);
 
   return (

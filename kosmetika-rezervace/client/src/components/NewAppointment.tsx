@@ -3,8 +3,11 @@ import { Button, MenuItem, TextField, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { getServices, Service } from '../api/services';
 import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
-import { getAllAppointments, Appointment as AnyAppointment } from '../api/appointmentsAll';
-import axios from 'axios';
+import {
+  getAllAppointments,
+  Appointment as AnyAppointment,
+} from '../api/appointmentsAll';
+import { createAppointment } from '../api/appointments';
 
 interface NewAppointmentProps {
   onCreated: () => void;
@@ -68,16 +71,7 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        '/api/appointments/me',
-        { date, service },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      await createAppointment({ date, service });
       alert('Objednávka byla úspěšně vytvořena!');
       setDate('');
       setService('');

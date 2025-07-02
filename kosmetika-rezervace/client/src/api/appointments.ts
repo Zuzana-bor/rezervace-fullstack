@@ -31,3 +31,22 @@ export const deleteAppointment = async (id: string): Promise<void> => {
     },
   });
 };
+
+export const createAppointment = async ({
+  date,
+  service,
+}: {
+  date: string;
+  service: string;
+}) => {
+  const token = getToken();
+  await axiosInstance.post(
+    '/appointments/me',
+    { date, service },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
