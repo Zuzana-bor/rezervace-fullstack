@@ -2,8 +2,10 @@ import axiosInstance from './axios';
 
 export type User = {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  phone?: string;
   role: string;
 };
 

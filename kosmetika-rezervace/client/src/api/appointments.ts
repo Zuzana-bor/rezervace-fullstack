@@ -50,3 +50,26 @@ export const createAppointment = async ({
     },
   );
 };
+
+export const createAppointmentAdmin = async ({
+  date,
+  service,
+  firstName,
+  lastName,
+}: {
+  date: string;
+  service: string;
+  firstName: string;
+  lastName: string;
+}) => {
+  const token = getToken();
+  await axiosInstance.post(
+    '/admin/appointments',
+    { date, service, firstName, lastName },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};

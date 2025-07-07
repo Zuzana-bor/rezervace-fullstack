@@ -38,7 +38,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req: Request, res: Response) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, phone } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ message: 'Vyplň všechna pole.' });
@@ -59,6 +59,7 @@ router.post('/register', async (req: Request, res: Response) => {
       lastName,
       email,
       password: hashedPassword,
+      phone,
     });
     await newUser.save();
 
@@ -80,6 +81,7 @@ router.post('/register', async (req: Request, res: Response) => {
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         role: newUser.role,
+        phone: newUser.phone,
       },
     });
   } catch (error) {

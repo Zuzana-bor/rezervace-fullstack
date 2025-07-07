@@ -34,14 +34,15 @@ export default function Home() {
             gutterBottom
             sx={{ fontFamily: 'Playfair Display, serif', color: '#2f6c3a' }}
           >
-            Vítejte v  Petra Jamborová 🌿
+            Vítejte! Kosmetika & masáže Petra Jamborová 🌿
           </Typography>
           <Typography
             variant="body1"
             gutterBottom
             sx={{ fontSize: '1.1rem', color: '#555' }}
           >
-            Dopřejte si chvíli pro sebe. Přihlaste se nebo si vytvořte účet a rezervujte si termín pohodlně online.
+            Dopřejte si chvíli pro sebe. Přihlaste se nebo si vytvořte účet a
+            rezervujte si termín pohodlně online.
           </Typography>
           <Box
             sx={{

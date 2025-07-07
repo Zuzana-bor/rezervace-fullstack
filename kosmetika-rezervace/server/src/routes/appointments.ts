@@ -92,7 +92,7 @@ router.get('/me', requireAuth, async (req, res) => {
   try {
     const appointments = await Appointment.find({ userId }).populate(
       'userId',
-      'name email',
+      'firstName lastName email',
     );
     res.status(200).json(appointments);
   } catch (err) {

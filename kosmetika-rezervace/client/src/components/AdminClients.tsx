@@ -45,6 +45,7 @@ const AdminClients = () => {
                 <EmailIcon sx={{ verticalAlign: 'middle', color: '#2f6c3a' }} />{' '}
                 E-mail
               </TableCell>
+              <TableCell>Telefon</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -54,6 +55,7 @@ const AdminClients = () => {
                   {u.firstName} {u.lastName}
                 </TableCell>
                 <TableCell>{u.email}</TableCell>
+                <TableCell>{u.phone || ''}</TableCell>
               </TableRow>
             ))}
           </TableBody>

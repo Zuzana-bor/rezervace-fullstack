@@ -25,6 +25,7 @@ const Register = () => {
     lastName: '',
     email: '',
     password: '',
+    phone: '',
   });
   const [message, setMessage] = useState('');
   const { login } = useAuth();
@@ -151,6 +152,14 @@ const Register = () => {
               }
               margin="normal"
             />
+            <TextField
+              label="Telefonní číslo"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
             <Button
               type="submit"
               variant="contained"
@@ -175,7 +184,7 @@ const Register = () => {
                 fontWeight: 600,
               }}
             >
-              Přihlas se
+              Přihlaš se
             </Link>
           </Typography>
 

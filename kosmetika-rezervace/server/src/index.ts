@@ -12,9 +12,11 @@ import adminAppointmentsRouter from './routes/adminAppointments';
 import adminUsersRouter from './routes/adminUsers';
 
 const app = express();
+
+const isDev = process.env.NODE_ENV !== 'production';
 app.use(
   cors({
-    origin: 'https://kosmetika-lhota.vercel.app',
+    origin: isDev ? true : 'https://kosmetika-lhota.vercel.app',
     credentials: true,
   }),
 );

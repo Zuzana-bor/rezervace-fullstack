@@ -1,4 +1,3 @@
-// src/components/NewAppointment.tsx
 import { Button, MenuItem, TextField, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { getServices, Service } from '../api/services';
@@ -7,43 +6,15 @@ import {
   getAllAppointments,
   Appointment as AnyAppointment,
 } from '../api/appointmentsAll';
-import { createAppointment } from '../api/appointments';
+import { createAppointmentAdmin } from '../api/appointments';
+import { useAuth } from '../context/AuthContext';
 
-interface NewAppointmentProps {
+interface AdminNewAppointmentProps {
   onCreated: () => void;
 }
 
-// Pomocné funkce pro blokování a obsazenost (přesunuto nahoru)
-function isBlocked(dateStr: string, blockedTimes: BlockedTime[]) {
-  if (!dateStr) return false;
-  const d = new Date(dateStr);
-  // Víkend
-  if (d.getDay() === 0 || d.getDay() === 6) return true;
-  // Blokované intervaly
-  return blockedTimes.some((b) => {
-    const start = new Date(b.start);
-    const end = new Date(b.end);
-    if (b.allDay) {
-      // Blokace na celý den
-      return (
-        d >= new Date(start.setHours(0, 0, 0, 0)) &&
-        d <= new Date(end.setHours(23, 59, 59, 999))
-      );
-    }
-    return d >= start && d < end;
-  });
-}
-function isOccupied(dateStr: string, allAppointments: AnyAppointment[]) {
-  if (!dateStr) return false;
-  const d = new Date(dateStr);
-  return allAppointments.some((a) => {
-    const start = new Date(a.date);
-    const end = new Date(start.getTime() + (a.duration || 60) * 60000);
-    return d >= start && d < end;
-  });
-}
-
-const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
+const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
+  const { user } = useAuth();
   const [date, setDate] = useState('');
   const [service, setService] = useState('');
   const [services, setServices] = useState<Service[]>([]);
@@ -51,6 +22,8 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
   const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
   const [allAppointments, setAllAppointments] = useState<AnyAppointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -58,7 +31,7 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
     Promise.all([
       getServices(),
       getBlockedTimes(),
-      getAllAppointments().catch(() => []), // pokud selže, vrátí prázdné pole
+      getAllAppointments().catch(() => []),
     ])
       .then(([services, blocked, appointments]) => {
         if (!isMounted) return;
@@ -83,11 +56,22 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!firstName.trim() || !lastName.trim()) {
+      alert('Vyplňte jméno a příjmení klientky.');
+      return;
+    }
     try {
-      await createAppointment({ date, service });
+      await createAppointmentAdmin({
+        date,
+        service,
+        firstName,
+        lastName,
+      });
       alert('Objednávka byla úspěšně vytvořena!');
       setDate('');
       setService('');
+      setFirstName('');
+      setLastName('');
       if (onCreated) onCreated();
     } catch (err) {
       console.error('Chyba při odesílání objednávky:', err);
@@ -99,21 +83,23 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
     <form onSubmit={handleSubmit}>
       <Stack spacing={2} mt={2}>
         <TextField
+          label="Jméno klientky"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+        />
+        <TextField
+          label="Příjmení klientky"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+        />
+        <TextField
           label="Datum a čas"
           type="datetime-local"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           InputLabelProps={{ shrink: true }}
-          error={
-            isBlocked(date, blockedTimes) || isOccupied(date, allAppointments)
-          }
-          helperText={
-            isBlocked(date, blockedTimes)
-              ? 'Tento termín je blokovaný.'
-              : isOccupied(date, allAppointments)
-              ? 'Tento termín je obsazený.'
-              : ''
-          }
           disabled={loading || services.length === 0}
         />
         <TextField
@@ -153,11 +139,11 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
             },
           }}
         >
-          Objednat se
+          Objednat klientku
         </Button>
       </Stack>
     </form>
   );
 };
 
-export default NewAppointment;
+export default AdminNewAppointment;

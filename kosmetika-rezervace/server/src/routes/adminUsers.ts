@@ -14,6 +14,7 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
     email: u.email,
     firstName: u.firstName,
     lastName: u.lastName,
+    phone: u.phone,
     role: u.role,
     createdAt: u.createdAt,
   }));
