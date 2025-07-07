@@ -30,10 +30,18 @@ const AdminBlockedTimes = () => {
   }, []);
 
   const handleAdd = async () => {
+    let startVal = start;
+    let endVal = end;
+    if (allDay && start) {
+      // Nastav čas od 00:00 do 23:59 pro vybraný den
+      const date = new Date(start);
+      startVal = new Date(date.setHours(0, 0, 0, 0)).toISOString();
+      endVal = new Date(date.setHours(23, 59, 59, 999)).toISOString();
+    }
     const token = localStorage.getItem('token');
     await axios.post(
       '/api/blocked-times',
-      { start, end, allDay, note },
+      { start: startVal, end: endVal, allDay, note },
       { headers: { Authorization: `Bearer ${token}` } },
     );
     setStart('');
@@ -41,6 +49,14 @@ const AdminBlockedTimes = () => {
     setAllDay(false);
     setNote('');
     fetchTimes();
+  };
+
+  // Při přepnutí na celý den smaž pole Do
+  const handleAllDayToggle = () => {
+    setAllDay((prev) => {
+      if (!prev) setEnd('');
+      return !prev;
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -71,10 +87,14 @@ const AdminBlockedTimes = () => {
             {times.map((b: any) => (
               <TableRow key={b._id}>
                 <TableCell>
-                  {b.allDay ? 'Celý den' : new Date(b.start).toLocaleString()}
+                  {b.allDay
+                    ? new Date(b.start).toLocaleDateString()
+                    : new Date(b.start).toLocaleString()}
                 </TableCell>
                 <TableCell>
-                  {b.allDay ? 'Celý den' : new Date(b.end).toLocaleString()}
+                  {b.allDay
+                    ? new Date(b.end).toLocaleDateString()
+                    : new Date(b.end).toLocaleString()}
                 </TableCell>
                 <TableCell>{b.allDay ? 'Ano' : 'Ne'}</TableCell>
                 <TableCell>{b.note}</TableCell>
@@ -107,7 +127,7 @@ const AdminBlockedTimes = () => {
       />
       <Button
         variant="outlined"
-        onClick={() => setAllDay(!allDay)}
+        onClick={handleAllDayToggle}
         sx={{ mr: 2 }}
         color={allDay ? 'success' : 'primary'}
       >
@@ -119,7 +139,11 @@ const AdminBlockedTimes = () => {
         onChange={(e) => setNote(e.target.value)}
         sx={{ mr: 2 }}
       />
-      <Button variant="contained" onClick={handleAdd} disabled={!start || !end}>
+      <Button
+        variant="contained"
+        onClick={handleAdd}
+        disabled={!start || (!end && !allDay)}
+      >
         Přidat
       </Button>
     </Paper>
