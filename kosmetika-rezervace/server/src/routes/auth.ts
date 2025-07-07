@@ -26,7 +26,8 @@ router.post('/login', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
       },
     });
@@ -37,9 +38,9 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
-  if (!name || !email || !password) {
+  if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ message: 'Vyplň všechna pole.' });
   }
 
@@ -53,7 +54,12 @@ router.post('/register', async (req: Request, res: Response) => {
     }
     // Zahashuj heslo před uložením
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
     await newUser.save();
 
     console.log('✅ Uživatel uložen:', newUser);
@@ -71,7 +77,8 @@ router.post('/register', async (req: Request, res: Response) => {
       user: {
         id: newUser._id,
         email: newUser.email,
-        name: newUser.name,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         role: newUser.role,
       },
     });

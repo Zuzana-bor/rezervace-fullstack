@@ -11,8 +11,21 @@ import {
 } from '@mui/material';
 import axiosInstance from '../api/axios';
 
+export type User = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password?: string;
+  // ...other properties
+};
+
 const Register = () => {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  });
   const [message, setMessage] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -25,8 +38,12 @@ const Register = () => {
       return;
     }
 
-    if (form.name.trim() === '') {
+    if (form.firstName.trim() === '') {
       alert('Zadej jméno');
+      return;
+    }
+    if (form.lastName.trim() === '') {
+      alert('Zadej příjmení');
       return;
     }
 
@@ -42,7 +59,8 @@ const Register = () => {
       login(
         {
           email: form.email,
-          name: form.name,
+          firstName: form.firstName,
+          lastName: form.lastName,
           password: '',
         },
         response.data.token,
@@ -94,8 +112,18 @@ const Register = () => {
             <TextField
               fullWidth
               label="Jméno"
-              name="name"
-              value={form.name}
+              name="firstName"
+              value={form.firstName}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Příjmení"
+              name="lastName"
+              value={form.lastName}
               onChange={(e) =>
                 setForm({ ...form, [e.target.name]: e.target.value })
               }

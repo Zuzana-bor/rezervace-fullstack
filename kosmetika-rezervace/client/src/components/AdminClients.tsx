@@ -39,7 +39,7 @@ const AdminClients = () => {
                 <PersonIcon
                   sx={{ verticalAlign: 'middle', color: '#2f6c3a' }}
                 />{' '}
-                Jméno
+                Jméno a příjmení
               </TableCell>
               <TableCell>
                 <EmailIcon sx={{ verticalAlign: 'middle', color: '#2f6c3a' }} />{' '}
@@ -49,8 +49,10 @@ const AdminClients = () => {
           </TableHead>
           <TableBody>
             {users.map((u: any) => (
-              <TableRow key={u._id}>
-                <TableCell sx={{ fontWeight: 500 }}>{u.name}</TableCell>
+              <TableRow key={u.id}>
+                <TableCell sx={{ fontWeight: 500 }}>
+                  {u.firstName} {u.lastName}
+                </TableCell>
                 <TableCell>{u.email}</TableCell>
               </TableRow>
             ))}

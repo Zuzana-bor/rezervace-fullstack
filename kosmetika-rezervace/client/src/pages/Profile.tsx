@@ -112,7 +112,7 @@ const Profile = () => {
                 color: '#2f6c3a',
               }}
             >
-              Dobrý den, {user.name}
+              Dobrý den, {user.firstName} {user.lastName}
             </Typography>
 
             <Button

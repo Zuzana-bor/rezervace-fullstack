@@ -10,7 +10,8 @@ import {
 // Typ pro uživatele
 export type User = {
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   password?: string;
   role?: string;
 };

@@ -8,7 +8,16 @@ const router = express.Router();
 // Získat všechny uživatele
 router.get('/', requireAuth, requireAdmin, async (req, res) => {
   const users = await User.find({}, '-password'); // Bez hesla
-  res.json(users);
+  // Vrátíme pouze potřebná pole
+  const usersMapped = users.map((u: any) => ({
+    id: u._id,
+    email: u.email,
+    firstName: u.firstName,
+    lastName: u.lastName,
+    role: u.role,
+    createdAt: u.createdAt,
+  }));
+  res.json(usersMapped);
 });
 
 // (Volitelně) Smazat uživatele

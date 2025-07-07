@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
@@ -15,7 +19,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    role:{type:String, default:"user"}
+    role: { type: String, default: 'user' },
   },
   { timestamps: true },
 ); // automaticky přidá createdAt a updatedAt
