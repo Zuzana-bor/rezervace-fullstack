@@ -10,7 +10,7 @@ import {
   Container,
   Paper,
 } from '@mui/material';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -30,7 +30,7 @@ const Login = () => {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:5000/auth/login', {
+      const response = await axiosInstance.post('/auth/login', {
         email: form.email,
         password: form.password,
       });

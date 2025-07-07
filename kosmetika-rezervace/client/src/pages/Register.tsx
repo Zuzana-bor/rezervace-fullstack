@@ -9,7 +9,7 @@ import {
   Container,
   Paper,
 } from '@mui/material';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 
 const Register = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -37,10 +37,7 @@ const Register = () => {
 
     try {
       console.log('Odesílám data:', form); // Debug: vypiš odesílaná data
-      const response = await axios.post(
-        'http://localhost:5000/auth/register',
-        form,
-      );
+      const response = await axiosInstance.post('/auth/register', form);
       setMessage(response.data.message);
       login(
         {
