@@ -21,7 +21,7 @@ app.use(
 const PORT = 5000;
 
 app.use(express.json());
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRouter);
 app.use('/api/services', servicesRouter);
 app.use('/api/blocked-times', blockedTimesRouter);
