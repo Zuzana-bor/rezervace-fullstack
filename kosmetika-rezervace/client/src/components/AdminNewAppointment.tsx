@@ -30,9 +30,9 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
     let isMounted = true;
     setLoading(true);
     Promise.all([
-      getServices(),
-      getBlockedTimes(),
-      getAllAppointments().catch(() => []),
+      getServices().catch((err) => { console.error('Chyba při načítání služeb:', err); return []; }),
+      getBlockedTimes().catch((err) => { console.error('Chyba při načítání blokací:', err); return []; }),
+      getAllAppointments().catch((err) => { console.error('Chyba při načítání rezervací:', err); return []; }),
     ])
       .then(([services, blocked, appointments]) => {
         if (!isMounted) return;
@@ -41,9 +41,10 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
         setAllAppointments(appointments);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!isMounted) return;
         setLoading(false);
+        console.error('Chyba při načítání dat:', err);
       });
     return () => {
       isMounted = false;
@@ -135,14 +136,14 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
           value={date}
           onChange={(e) => setDate(e.target.value)}
           InputLabelProps={{ shrink: true }}
-          disabled={loading || services.length === 0}
+          disabled={loading}
         />
         <TextField
           label="Služba"
           select
           value={service}
           onChange={(e) => setService(e.target.value)}
-          disabled={services.length === 0}
+          disabled={loading}
         >
           {services.length === 0 ? (
             <MenuItem value="" disabled>
