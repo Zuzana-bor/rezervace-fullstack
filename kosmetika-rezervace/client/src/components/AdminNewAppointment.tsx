@@ -61,9 +61,11 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
       return;
     }
     try {
+      // Najdi název služby podle _id
+      const foundService = services.find((s) => s._id === service);
       await createAppointmentAdmin({
         date,
-        service,
+        service: foundService ? foundService.name : service,
         firstName,
         lastName,
       });
