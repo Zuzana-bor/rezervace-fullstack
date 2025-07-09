@@ -12,7 +12,7 @@ import {
   TextField,
 } from '@mui/material';
 import { getServices } from '../api/services';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 
 const AdminServices = () => {
   const [services, setServices] = useState([]);
@@ -30,8 +30,8 @@ const AdminServices = () => {
 
   const handleAdd = async () => {
     const token = localStorage.getItem('token');
-    await axios.post(
-      '/api/services',
+    await axiosInstance.post(
+      '/services',
       { name, price: Number(price), duration: Number(duration) },
       { headers: { Authorization: `Bearer ${token}` } },
     );
@@ -43,7 +43,7 @@ const AdminServices = () => {
 
   const handleDelete = async (id: string) => {
     const token = localStorage.getItem('token');
-    await axios.delete(`/api/services/${id}`, {
+    await axiosInstance.delete(`/services/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchServices();
