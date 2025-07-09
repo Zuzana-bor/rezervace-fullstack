@@ -9,7 +9,7 @@ import servicesRouter from './routes/services';
 import blockedTimesRouter from './routes/blockedTimes';
 import adminAppointmentsRouter from './routes/adminAppointments';
 import adminUsersRouter from './routes/adminUsers';
-import cron from 'node-cron';
+import * as cron from 'node-cron';
 import axios from 'axios';
 import { Appointment } from './models/Appointments';
 
