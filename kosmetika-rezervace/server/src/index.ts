@@ -29,49 +29,59 @@ app.use(
 const PORT = process.env.PORT || 5000;
 
 // Spouští se každý den v 18:00
-cron.schedule('0 18 * * *', async () => {
-  if (!GOSMS_LOGIN || !GOSMS_PASSWORD) {
-    console.error('GOSMS_LOGIN nebo GOSMS_PASSWORD není nastaveno v .env!');
-    return;
-  }
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-  const dayAfter = new Date(tomorrow);
-  dayAfter.setDate(dayAfter.getDate() + 1);
-
-  // Najdi rezervace na zítřek
-  const appointments = await Appointment.find({
-    date: { $gte: tomorrow, $lt: dayAfter },
-  }).populate('userId');
-
-  for (const appt of appointments) {
-    // Type assertion to inform TypeScript that userId is populated and has a phone property
-    const user = appt.userId as { phone?: string } | null | undefined;
-    const phone = user?.phone || appt.clientPhone;
-    if (!phone) continue;
-
-    const text = `Připomínka: Zítra v ${new Date(appt.date).toLocaleTimeString(
-      'cs-CZ',
-      { hour: '2-digit', minute: '2-digit' },
-    )} máte rezervaci u Petry Jamborové.`;
-
+try {
+  cron.schedule('0 18 * * *', async () => {
     try {
-      await axios.post('https://app.gosms.cz/api/v1/message', {
-        login: GOSMS_LOGIN,
-        password: GOSMS_PASSWORD,
-        number: phone,
-        message: text,
-      });
-      console.log(`SMS odeslána na ${phone}`);
-    } catch (err: any) {
-      console.error(
-        'Chyba při odesílání SMS:',
-        err?.response?.data || err.message,
-      );
+      if (!GOSMS_LOGIN || !GOSMS_PASSWORD) {
+        console.error('GOSMS_LOGIN nebo GOSMS_PASSWORD není nastaveno v .env!');
+        return;
+      }
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      const dayAfter = new Date(tomorrow);
+      dayAfter.setDate(dayAfter.getDate() + 1);
+
+      // Najdi rezervace na zítřek
+      const appointments = await Appointment.find({
+        date: { $gte: tomorrow, $lt: dayAfter },
+      }).populate('userId');
+
+      for (const appt of appointments) {
+        // Type assertion to inform TypeScript that userId is populated and has a phone property
+        const user = appt.userId as { phone?: string } | null | undefined;
+        const phone = user?.phone || appt.clientPhone;
+        if (!phone) continue;
+
+        const text = `Připomínka: Zítra v ${new Date(
+          appt.date,
+        ).toLocaleTimeString('cs-CZ', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })} máte rezervaci u Petry Jamborové.`;
+
+        try {
+          await axios.post('https://app.gosms.cz/api/v1/message', {
+            login: GOSMS_LOGIN,
+            password: GOSMS_PASSWORD,
+            number: phone,
+            message: text,
+          });
+          console.log(`SMS odeslána na ${phone}`);
+        } catch (err: any) {
+          console.error(
+            'Chyba při odesílání SMS:',
+            err?.response?.data || err.message,
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Chyba v cron úloze GoSMS:', err);
     }
-  }
-});
+  });
+} catch (err) {
+  console.error('Chyba při inicializaci cron úlohy GoSMS:', err);
+}
 
 app.use(express.json());
 app.use('/api/auth', authRoutes);
