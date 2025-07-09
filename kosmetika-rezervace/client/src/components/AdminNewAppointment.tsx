@@ -30,9 +30,18 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
     let isMounted = true;
     setLoading(true);
     Promise.all([
-      getServices().catch((err) => { console.error('Chyba při načítání služeb:', err); return []; }),
-      getBlockedTimes().catch((err) => { console.error('Chyba při načítání blokací:', err); return []; }),
-      getAllAppointments().catch((err) => { console.error('Chyba při načítání rezervací:', err); return []; }),
+      getServices().catch((err) => {
+        console.error('Chyba při načítání služeb:', err);
+        return [];
+      }),
+      getBlockedTimes().catch((err) => {
+        console.error('Chyba při načítání blokací:', err);
+        return [];
+      }),
+      getAllAppointments().catch((err) => {
+        console.error('Chyba při načítání rezervací:', err);
+        return [];
+      }),
     ])
       .then(([services, blocked, appointments]) => {
         if (!isMounted) return;

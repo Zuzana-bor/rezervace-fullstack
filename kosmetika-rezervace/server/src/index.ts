@@ -20,9 +20,27 @@ const GOSMS_PASSWORD = process.env.GOSMS_PASSWORD;
 const app = express();
 
 const isDev = process.env.NODE_ENV !== 'production';
+const allowedOrigins = [
+  'https://kosmetika-lhota.vercel.app',
+  'https://rezervace-fullstack.onrender.com',
+  'https://rezervace-fullstack.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
 app.use(
   cors({
-    origin: isDev ? true : ['https://kosmetika-lhota.vercel.app'],
+    origin: (origin, callback) => {
+      // Povolit požadavky bez originu (např. curl, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(
+        new Error('CORS policy: This origin is not allowed'),
+        false,
+      );
+    },
     credentials: true,
   }),
 );
