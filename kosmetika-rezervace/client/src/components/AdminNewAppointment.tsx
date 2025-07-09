@@ -24,6 +24,7 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
   const [loading, setLoading] = useState(true);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [clientPhone, setClientPhone] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -60,24 +61,50 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
       alert('Vyplňte jméno a příjmení klientky.');
       return;
     }
+    if (!clientPhone.trim()) {
+      alert('Vyplňte telefon klientky.');
+      return;
+    }
+    // Základní validace českého čísla (9 číslic, může začínat +420)
+    const phonePattern = /^(\+420)?\s?\d{3}\s?\d{3}\s?\d{3}$/;
+    if (!phonePattern.test(clientPhone.replace(/\s+/g, ''))) {
+      alert('Zadejte platné telefonní číslo (9 číslic, případně s +420).');
+      return;
+    }
+    if (!date) {
+      alert('Vyberte datum a čas.');
+      return;
+    }
+    if (!service) {
+      alert('Vyberte službu.');
+      return;
+    }
     try {
       // Najdi název služby podle _id
       const foundService = services.find((s) => s._id === service);
+      if (!foundService) {
+        alert('Vybraná služba nebyla nalezena.');
+        return;
+      }
       await createAppointmentAdmin({
         date,
-        service: foundService ? foundService.name : service,
-        firstName,
-        lastName,
+        service: foundService.name,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        clientPhone: clientPhone.trim(),
       });
       alert('Objednávka byla úspěšně vytvořena!');
       setDate('');
       setService('');
       setFirstName('');
       setLastName('');
+      setClientPhone('');
       if (onCreated) onCreated();
     } catch (err) {
       console.error('Chyba při odesílání objednávky:', err);
-      alert('Chyba při vytváření objednávky');
+      alert(
+        'Chyba při vytváření objednávky. Zkontrolujte připojení a zadané údaje.',
+      );
     }
   };
 
@@ -94,6 +121,12 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
           label="Příjmení klientky"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
+          required
+        />
+        <TextField
+          label="Telefon klientky"
+          value={clientPhone}
+          onChange={(e) => setClientPhone(e.target.value)}
           required
         />
         <TextField

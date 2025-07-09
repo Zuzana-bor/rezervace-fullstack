@@ -8,6 +8,7 @@ const appointmentSchema = new mongoose.Schema({
   duration: { type: Number, required: true }, // délka služby v minutách
   clientFirstName: { type: String },
   clientLastName: { type: String },
+  clientPhone: { type: String },
   createdByAdmin: { type: Boolean, default: false },
 });
 

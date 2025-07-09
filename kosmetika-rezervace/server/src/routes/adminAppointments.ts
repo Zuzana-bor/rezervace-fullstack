@@ -30,7 +30,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
 
 // Vytvořit rezervaci pro libovolného klienta (admin)
 router.post('/', requireAuth, requireAdmin, async (req, res) => {
-  const { date, service, firstName, lastName } = req.body;
+  const { date, service, firstName, lastName, clientPhone } = req.body;
   try {
     if (!date || !service || !firstName || !lastName) {
       return res.status(400).json({
@@ -38,7 +38,6 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       });
     }
     // Najdi službu podle názvu (nebo ID, podle implementace)
-    // Pokud máš ID, uprav na findById
     const foundService = await require('../models/Service').Service.findOne({
       name: service,
     });
@@ -48,7 +47,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     const price = foundService.price;
     const duration = foundService.duration;
     const start = new Date(date);
-    // Vytvoř rezervaci bez userId, ale s jménem a příjmením klientky
+    // Vytvoř rezervaci bez userId, ale s jménem, příjmením a telefonem klientky
     const appointment = new Appointment({
       date: start,
       service: foundService.name,
@@ -56,6 +55,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       duration,
       clientFirstName: firstName,
       clientLastName: lastName,
+      clientPhone,
       createdByAdmin: true,
     });
     const saved = await appointment.save();
