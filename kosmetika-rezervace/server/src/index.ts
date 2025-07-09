@@ -48,8 +48,8 @@ const PORT = process.env.PORT || 5000;
 
 // Spouští se každý den v 18:00
 try {
-  // TEST: Spouští se každý den ve 20:40 (pro testování SMS)
-  cron.schedule('40 20 * * *', async () => {
+  // TEST: Spouští se každý den ve 20:45 (pro testování SMS)
+  cron.schedule('45 20 * * *', async () => {
     try {
       if (!GOSMS_LOGIN || !GOSMS_PASSWORD) {
         console.error('GOSMS_LOGIN nebo GOSMS_PASSWORD není nastaveno v .env!');
