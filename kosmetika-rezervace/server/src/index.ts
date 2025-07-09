@@ -48,7 +48,8 @@ const PORT = process.env.PORT || 5000;
 
 // Spouští se každý den v 18:00
 try {
-  cron.schedule('0 18 * * *', async () => {
+  // TEST: Spouští se každý den ve 20:40 (pro testování SMS)
+  cron.schedule('40 20 * * *', async () => {
     try {
       if (!GOSMS_LOGIN || !GOSMS_PASSWORD) {
         console.error('GOSMS_LOGIN nebo GOSMS_PASSWORD není nastaveno v .env!');
@@ -66,7 +67,6 @@ try {
       }).populate('userId');
 
       for (const appt of appointments) {
-        // Type assertion to inform TypeScript that userId is populated and has a phone property
         const user = appt.userId as { phone?: string } | null | undefined;
         const phone = user?.phone || appt.clientPhone;
         if (!phone) continue;
