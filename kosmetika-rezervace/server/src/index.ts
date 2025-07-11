@@ -47,7 +47,7 @@ const PORT = process.env.PORT || 5000;
 const GOSMS_ACCESS_TOKEN = process.env.GOSMS_ACCESS_TOKEN;
 
 try {
-  cron.schedule('35 10 * * *', async () => {
+  cron.schedule('45 10 * * *', async () => {
     try {
       if (!GOSMS_ACCESS_TOKEN) {
         console.error('GOSMS_ACCESS_TOKEN není nastaven v .env!');
