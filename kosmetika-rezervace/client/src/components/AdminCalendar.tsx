@@ -31,9 +31,11 @@ const AdminCalendar = ({
       setRawEvents(r);
       setEvents(
         r.map((a: any) => ({
-          id: a._id,
+          id: a._id, // FullCalendar potřebuje id
           title: `${a.service} – ${a.userId?.name || ''}`,
           start: a.date,
+          _id: a._id, // přidej _id explicitně
+          ...a, // předej celé appointment pro detail/mazání
         })),
       );
     });
@@ -56,8 +58,8 @@ const AdminCalendar = ({
         height={600}
         eventClick={(info) => {
           if (onEventClick) {
-            const found = rawEvents.find((a) => a._id === info.event.id);
-            if (found) onEventClick(found);
+            // předávej celý event objekt včetně _id
+            onEventClick(info.event.extendedProps);
           }
         }}
         dateClick={(info) => {
