@@ -141,11 +141,26 @@ const AdminBlockedTimes = () => {
       />
       <Button
         variant="contained"
-        onClick={handleAdd}
+        onClick={async () => {
+          try {
+            await handleAdd();
+          } catch (err) {
+            alert(
+              'Chyba při přidávání blokovaného času: ' +
+                (err instanceof Error ? err.message : String(err)),
+            );
+          }
+        }}
         disabled={!start || (!end && !allDay)}
       >
         Přidat
       </Button>
+      {/* Zobrazit chybovou hlášku pokud je tlačítko disabled */}
+      {(!start || (!end && !allDay)) && (
+        <Typography color="error" sx={{ mt: 1 }}>
+          Vyplňte pole Od a Do (nebo zaškrtněte Celý den).
+        </Typography>
+      )}
     </Paper>
   );
 };
