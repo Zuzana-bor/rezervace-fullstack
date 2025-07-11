@@ -114,16 +114,21 @@ try {
 
         try {
           await axios.post(
-            'https://app.gosms.eu/selfservice/api/message',
+            `https://app.gosms.eu/api/v1/messages?access_token=${GOSMS_ACCESS_TOKEN}`,
             {
-              number: phone.startsWith('+')
-                ? phone
-                : `+420${phone.replace(/\s+/g, '')}`,
               message: text,
+              recipients: [
+                phone.startsWith('+')
+                  ? phone
+                  : `+420${phone.replace(/\s+/g, '')}`,
+              ],
+              channel: 468188,
+              expectedSendStart: new Date()
+                .toISOString()
+                .replace(/\.\d{3}Z$/, '+0200'),
             },
             {
               headers: {
-                Authorization: `Bearer ${GOSMS_ACCESS_TOKEN}`,
                 'Content-Type': 'application/json',
               },
             },
@@ -196,16 +201,21 @@ app.get('/api/test-sms', async (req, res) => {
       const text = `Dobrý den, zítra v ${time} máte rezervaci (${serviceName}). Těším se na vás, Petra.`;
       try {
         await axios.post(
-          'https://app.gosms.eu/selfservice/api/message',
+          `https://app.gosms.eu/api/v1/messages?access_token=${GOSMS_ACCESS_TOKEN}`,
           {
-            number: phone.startsWith('+')
-              ? phone
-              : `+420${phone.replace(/\s+/g, '')}`,
             message: text,
+            recipients: [
+              phone.startsWith('+')
+                ? phone
+                : `+420${phone.replace(/\s+/g, '')}`,
+            ],
+            channel: 468188,
+            expectedSendStart: new Date()
+              .toISOString()
+              .replace(/\.\d{3}Z$/, '+0200'),
           },
           {
             headers: {
-              Authorization: `Bearer ${GOSMS_ACCESS_TOKEN}`,
               'Content-Type': 'application/json',
             },
           },
