@@ -27,6 +27,7 @@ import AdminCalendar from './AdminCalendar';
 import AdminServices from './AdminServices';
 import AdminBlockedTimes from './AdminBlockedTimes';
 import AdminNewAppointment from './AdminNewAppointment';
+import { getGoSmsCredit } from '../api/gosms';
 
 const drawerWidth = 240;
 
@@ -53,6 +54,7 @@ const AdminDashboard = () => {
     null,
   );
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const [gosmsCredit, setGosmsCredit] = useState<number | null>(null);
 
   useEffect(() => {
     if (selectedReservation && closeBtnRef.current) {
@@ -63,18 +65,35 @@ const AdminDashboard = () => {
     }
   }, [selectedReservation]);
 
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      getGoSmsCredit()
+        .then(setGosmsCredit)
+        .catch(() => setGosmsCredit(null));
+    }
+  }, [user]);
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleDeleteReservation = async (id: string) => {
     const token = localStorage.getItem('token');
-    await fetch(`/api/admin/appointments/${id}`, {
+    const res = await fetch(`/api/admin/appointments/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     });
-    setSelectedReservation(null);
-    setCalendarKey((k) => k + 1);
+    if (res.ok) {
+      // Optimisticky odeber event z kalendáře (pokud by byl problém s refreshKey)
+      setSelectedReservation(null);
+      setCalendarKey((k) => k + 1);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(
+        'Chyba při mazání rezervace: ' +
+          (data.message || res.statusText || 'Neznámá chyba'),
+      );
+    }
   };
 
   const drawer = (
@@ -110,6 +129,18 @@ const AdminDashboard = () => {
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             Admin – {user?.firstName} {user?.lastName}
           </Typography>
+          {gosmsCredit !== null && (
+            <Typography
+              variant="body2"
+              sx={{
+                mr: 2,
+                color: gosmsCredit < 20 ? 'red' : 'inherit',
+                fontWeight: 600,
+              }}
+            >
+              GoSMS kredit: {gosmsCredit} Kč
+            </Typography>
+          )}
           <Typography
             variant="body2"
             sx={{ cursor: 'pointer' }}

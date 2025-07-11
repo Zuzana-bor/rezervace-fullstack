@@ -259,3 +259,33 @@ app.get('/api/test-sms', async (req, res) => {
       .json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
+
+// Endpoint pro zjištění kreditu GoSMS (pouze pro admina)
+app.get('/api/admin/gosms-credit', async (req, res) => {
+  try {
+    // Ověření admina (použijte vlastní middleware pokud máte)
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Chybí token' });
+    }
+    // (volitelně: ověřit JWT a roli admina)
+    if (!gosmsAccessToken) {
+      return res.status(500).json({ message: 'Chybí GoSMS access token' });
+    }
+    const resp = await axios.get(
+      'https://app.gosms.eu/selfservice/api/credit',
+      {
+        headers: {
+          Authorization: `Bearer ${gosmsAccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    res.json({ credit: resp.data?.credit ?? null });
+  } catch (err: any) {
+    res.status(500).json({
+      message: 'Chyba při získávání kreditu',
+      error: err?.response?.data || err.message,
+    });
+  }
+});
