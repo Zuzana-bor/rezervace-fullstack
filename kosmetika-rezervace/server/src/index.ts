@@ -43,11 +43,11 @@ app.use(
 );
 const PORT = process.env.PORT || 5000;
 
-// GoSMS.cz integrace: Spouští se každý den v 18:00 (OAuth2 token-based autentizace)
+// GoSMS.cz integrace: Spouští se každý den v 10:00 (OAuth2 token-based autentizace)
 const GOSMS_ACCESS_TOKEN = process.env.GOSMS_ACCESS_TOKEN;
 
 try {
-  cron.schedule('0 18 * * *', async () => {
+  cron.schedule('0 10 * * *', async () => {
     try {
       if (!GOSMS_ACCESS_TOKEN) {
         console.error('GOSMS_ACCESS_TOKEN není nastaven v .env!');

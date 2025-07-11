@@ -10,6 +10,10 @@ import {
   TableRow,
   Button,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { getServices } from '../api/services';
 import axiosInstance from '../api/axios';
@@ -19,6 +23,11 @@ const AdminServices = () => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [duration, setDuration] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editService, setEditService] = useState<any>(null);
+  const [editName, setEditName] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [editDuration, setEditDuration] = useState('');
 
   const fetchServices = () => {
     getServices().then(setServices);
@@ -71,6 +80,18 @@ const AdminServices = () => {
                 <TableCell>{s.price} Kč</TableCell>
                 <TableCell>{s.duration} min</TableCell>
                 <TableCell>
+                  <Button
+                    color="primary"
+                    onClick={() => {
+                      setEditService(s);
+                      setEditName(s.name);
+                      setEditPrice(s.price.toString());
+                      setEditDuration(s.duration.toString());
+                      setEditDialogOpen(true);
+                    }}
+                  >
+                    Upravit
+                  </Button>
                   <Button color="error" onClick={() => handleDelete(s._id)}>
                     Smazat
                   </Button>
@@ -110,6 +131,54 @@ const AdminServices = () => {
       >
         Přidat
       </Button>
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+        <DialogTitle>Upravit službu</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Název"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            sx={{ mr: 2, mt: 2 }}
+          />
+          <TextField
+            label="Cena"
+            type="number"
+            value={editPrice}
+            onChange={(e) => setEditPrice(e.target.value)}
+            sx={{ mr: 2, mt: 2 }}
+          />
+          <TextField
+            label="Délka (min)"
+            type="number"
+            value={editDuration}
+            onChange={(e) => setEditDuration(e.target.value)}
+            sx={{ mr: 2, mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)}>Zrušit</Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              const token = localStorage.getItem('token');
+              await axiosInstance.put(
+                `/services/${editService._id}`,
+                {
+                  name: editName,
+                  price: Number(editPrice),
+                  duration: Number(editDuration),
+                },
+                { headers: { Authorization: `Bearer ${token}` } },
+              );
+              setEditDialogOpen(false);
+              fetchServices();
+            }}
+            disabled={!editName || !editPrice || !editDuration}
+          >
+            Uložit změny
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
