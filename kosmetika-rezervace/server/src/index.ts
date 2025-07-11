@@ -161,3 +161,68 @@ app.listen(PORT, () => {
 app.get('/', (req, res) => {
   res.send('Server běží!');
 });
+
+app.get('/api/test-sms', async (req, res) => {
+  try {
+    if (!GOSMS_ACCESS_TOKEN) {
+      return res
+        .status(500)
+        .json({ error: 'GOSMS_ACCESS_TOKEN není nastaven!' });
+    }
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const dayAfter = new Date(tomorrow);
+    dayAfter.setDate(dayAfter.getDate() + 1);
+    const appointments = await Appointment.find({
+      date: { $gte: tomorrow, $lt: dayAfter },
+    }).populate('userId');
+    let results = [];
+    for (const appt of appointments) {
+      const user = appt.userId as
+        | { phone?: string; firstName?: string; lastName?: string }
+        | null
+        | undefined;
+      const phone = user?.phone || appt.clientPhone;
+      const serviceName = appt.service || '';
+      if (!phone) {
+        results.push({ appt, status: 'NO_PHONE' });
+        continue;
+      }
+      const time = new Date(appt.date).toLocaleTimeString('cs-CZ', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const text = `Dobrý den, zítra v ${time} máte rezervaci (${serviceName}). Těším se na vás, Petra.`;
+      try {
+        await axios.post(
+          'https://app.gosms.cz/api/v1/message',
+          {
+            number: phone.startsWith('+')
+              ? phone
+              : `+420${phone.replace(/\s+/g, '')}`,
+            message: text,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${GOSMS_ACCESS_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        results.push({ appt, status: 'OK', phone });
+      } catch (err: any) {
+        results.push({
+          appt,
+          status: 'ERROR',
+          error: err?.response?.data || err.message,
+        });
+      }
+    }
+    res.json({ count: appointments.length, results });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
