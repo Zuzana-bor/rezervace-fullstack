@@ -166,6 +166,7 @@ const AdminDashboard = () => {
         {section === 'calendar' && (
           <AdminCalendar
             key={calendarKey}
+            refreshKey={calendarKey}
             onEventClick={setSelectedReservation}
             onDateClick={(dateStr) => {
               // dateStr je v UTC, převedeme na lokální čas yyyy-MM-ddTHH:mm

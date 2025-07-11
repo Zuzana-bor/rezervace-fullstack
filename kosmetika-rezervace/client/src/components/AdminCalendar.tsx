@@ -9,6 +9,7 @@ import { getAllAppointments } from '../api/appointmentsAll';
 interface AdminCalendarProps {
   onEventClick?: (event: any) => void;
   onDateClick?: (dateStr: string) => void;
+  refreshKey?: number;
 }
 
 interface CalendarEvent {
@@ -17,7 +18,11 @@ interface CalendarEvent {
   start: string;
 }
 
-const AdminCalendar = ({ onEventClick, onDateClick }: AdminCalendarProps) => {
+const AdminCalendar = ({
+  onEventClick,
+  onDateClick,
+  refreshKey,
+}: AdminCalendarProps) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [rawEvents, setRawEvents] = useState<any[]>([]);
 
@@ -32,7 +37,7 @@ const AdminCalendar = ({ onEventClick, onDateClick }: AdminCalendarProps) => {
         })),
       );
     });
-  }, []);
+  }, [refreshKey]);
 
   return (
     <Paper sx={{ p: 2 }}>
