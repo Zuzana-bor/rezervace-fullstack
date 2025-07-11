@@ -45,6 +45,36 @@ const PORT = process.env.PORT || 5000;
 
 let gosmsAccessToken = process.env.GOSMS_ACCESS_TOKEN;
 
+// Získání GoSMS access tokenu při startu serveru
+async function refreshGoSmsToken() {
+  try {
+    const resp = await axios.post(
+      'https://app.gosms.eu/oauth/v2/token',
+      `client_id=${process.env.GOSMS_LOGIN}&client_secret=${process.env.GOSMS_PASSWORD}&grant_type=client_credentials`,
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
+    );
+    gosmsAccessToken = resp.data.access_token;
+    console.log('GoSMS access token byl získán při startu serveru.');
+  } catch (err) {
+    console.error(
+      'Chyba při získávání GoSMS tokenu při startu serveru:',
+      err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        err.response &&
+        typeof err.response === 'object' &&
+        'data' in err.response
+        ? (err as any).response.data
+        : err && typeof err === 'object' && 'message' in err
+        ? (err as any).message
+        : String(err),
+    );
+  }
+}
+refreshGoSmsToken();
+
 // Automatické obnovení tokenu každý den v 17:30
 cron.schedule('30 17 * * *', async () => {
   try {
