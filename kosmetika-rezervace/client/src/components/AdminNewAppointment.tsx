@@ -11,11 +11,19 @@ import { useAuth } from '../context/AuthContext';
 
 interface AdminNewAppointmentProps {
   onCreated: () => void;
+  defaultDate?: string | null;
 }
 
-const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
+const AdminNewAppointment = ({
+  onCreated,
+  defaultDate,
+}: AdminNewAppointmentProps) => {
   const { user } = useAuth();
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(() => {
+    if (!defaultDate) return '';
+    // Pokud je v defaultDate čas (obsahuje T), použijeme ho, jinak přidáme T10:00
+    return defaultDate.includes('T') ? defaultDate : defaultDate + 'T10:00';
+  });
   const [service, setService] = useState('');
   const [services, setServices] = useState<Service[]>([]);
   const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
@@ -65,6 +73,28 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
     setSelectedPrice(found ? found.price : null);
   }, [service, services]);
 
+  useEffect(() => {
+    if (defaultDate) {
+      setDate(defaultDate.includes('T') ? defaultDate : defaultDate + 'T10:00');
+    }
+  }, [defaultDate]);
+
+  const isOverlapping = () => {
+    if (!date || !service) return false;
+    const foundService = services.find((s) => s._id === service);
+    if (!foundService) return false;
+    const start = new Date(date);
+    const end = new Date(start.getTime() + foundService.duration * 60000);
+    return allAppointments.some((appt) => {
+      const apptStart = new Date(appt.date);
+      const apptEnd = new Date(
+        apptStart.getTime() + (appt.duration || 0) * 60000,
+      );
+      // Překryv: (start < apptEnd) && (end > apptStart)
+      return start < apptEnd && end > apptStart;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim()) {
@@ -87,6 +117,12 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
     }
     if (!service) {
       alert('Vyberte službu.');
+      return;
+    }
+    if (isOverlapping()) {
+      alert(
+        'V tomto čase již existuje jiná rezervace. Vyberte prosím jiný čas.',
+      );
       return;
     }
     try {
@@ -183,9 +219,15 @@ const AdminNewAppointment = ({ onCreated }: AdminNewAppointmentProps) => {
               backgroundColor: '#265a32',
             },
           }}
+          disabled={isOverlapping()}
         >
           Objednat klientku
         </Button>
+        {isOverlapping() && (
+          <Typography color="error" sx={{ mt: 1 }}>
+            V tomto čase již existuje jiná rezervace. Vyberte prosím jiný čas.
+          </Typography>
+        )}
       </Stack>
     </form>
   );

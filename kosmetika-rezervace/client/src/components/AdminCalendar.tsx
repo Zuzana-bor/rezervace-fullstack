@@ -8,6 +8,7 @@ import { getAllAppointments } from '../api/appointmentsAll';
 
 interface AdminCalendarProps {
   onEventClick?: (event: any) => void;
+  onDateClick?: (dateStr: string) => void;
 }
 
 interface CalendarEvent {
@@ -16,7 +17,7 @@ interface CalendarEvent {
   start: string;
 }
 
-const AdminCalendar = ({ onEventClick }: AdminCalendarProps) => {
+const AdminCalendar = ({ onEventClick, onDateClick }: AdminCalendarProps) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [rawEvents, setRawEvents] = useState<any[]>([]);
 
@@ -53,6 +54,12 @@ const AdminCalendar = ({ onEventClick }: AdminCalendarProps) => {
             const found = rawEvents.find((a) => a._id === info.event.id);
             if (found) onEventClick(found);
           }
+        }}
+        dateClick={(info) => {
+          // Pokud je v info.date čas (např. při kliknutí v timeGrid), použijeme ho
+          const dateObj = info.date;
+          const iso = dateObj.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
+          if (onDateClick) onDateClick(iso);
         }}
       />
     </Paper>

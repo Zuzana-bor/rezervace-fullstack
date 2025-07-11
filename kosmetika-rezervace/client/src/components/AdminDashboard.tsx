@@ -33,11 +33,6 @@ const drawerWidth = 240;
 const menu = [
   { key: 'calendar', label: 'Rezervace', icon: <CalendarMonthIcon /> },
   { key: 'clients', label: 'Klientky', icon: <PeopleIcon /> },
-  {
-    key: 'adminnew',
-    label: 'Vytvořit rezervaci',
-    icon: <CalendarMonthIcon />,
-  },
   { key: 'services', label: 'Služby', icon: <BuildIcon /> },
   { key: 'blocked', label: 'Blokované časy', icon: <BlockIcon /> },
 ];
@@ -53,6 +48,10 @@ const AdminDashboard = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editReservation, setEditReservation] = useState<any>(null);
   const [editValues, setEditValues] = useState<any>({});
+  const [newAppointmentOpen, setNewAppointmentOpen] = useState(false);
+  const [newAppointmentDate, setNewAppointmentDate] = useState<string | null>(
+    null,
+  );
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -168,13 +167,20 @@ const AdminDashboard = () => {
           <AdminCalendar
             key={calendarKey}
             onEventClick={setSelectedReservation}
+            onDateClick={(dateStr) => {
+              // dateStr je v UTC, převedeme na lokální čas yyyy-MM-ddTHH:mm
+              const d = new Date(dateStr);
+              const pad = (n: number) => n.toString().padStart(2, '0');
+              const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+                d.getDate(),
+              )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+              setNewAppointmentDate(local);
+              setNewAppointmentOpen(true);
+            }}
           />
         )}
         {section === 'services' && <AdminServices />}
         {section === 'blocked' && <AdminBlockedTimes />}
-        {section === 'adminnew' && (
-          <AdminNewAppointment onCreated={() => setSection('calendar')} />
-        )}
 
         {/* Detail dialog rezervace */}
         <Dialog
@@ -381,6 +387,30 @@ const AdminDashboard = () => {
             </MuiButton>
           </DialogActions>
         </Dialog>
+
+        {/* Dialog pro novou rezervaci */}
+        {newAppointmentOpen && (
+          <Dialog
+            open={newAppointmentOpen}
+            onClose={() => setNewAppointmentOpen(false)}
+          >
+            <DialogTitle>Nová rezervace</DialogTitle>
+            <DialogContent>
+              <AdminNewAppointment
+                onCreated={() => {
+                  setNewAppointmentOpen(false);
+                  setCalendarKey((k) => k + 1);
+                }}
+                defaultDate={newAppointmentDate}
+              />
+            </DialogContent>
+            <DialogActions>
+              <MuiButton onClick={() => setNewAppointmentOpen(false)}>
+                Zavřít
+              </MuiButton>
+            </DialogActions>
+          </Dialog>
+        )}
       </Box>
     </Box>
   );
