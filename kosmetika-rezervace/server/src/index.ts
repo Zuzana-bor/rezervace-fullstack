@@ -47,7 +47,7 @@ const PORT = process.env.PORT || 5000;
 const GOSMS_ACCESS_TOKEN = process.env.GOSMS_ACCESS_TOKEN;
 
 try {
-  cron.schedule('03 11 * * *', async () => {
+  cron.schedule('10 11 * * *', async () => {
     try {
       if (!GOSMS_ACCESS_TOKEN) {
         console.error('GOSMS_ACCESS_TOKEN není nastaven v .env!');
@@ -123,9 +123,6 @@ try {
                   : `+420${phone.replace(/\s+/g, '')}`,
               ],
               channel: 468188,
-              expectedSendStart: new Date()
-                .toISOString()
-                .replace(/\.\d{3}Z$/, '+0200'),
             },
             {
               headers: {
@@ -210,9 +207,6 @@ app.get('/api/test-sms', async (req, res) => {
                 : `+420${phone.replace(/\s+/g, '')}`,
             ],
             channel: 468188,
-            expectedSendStart: new Date()
-              .toISOString()
-              .replace(/\.\d{3}Z$/, '+0200'),
           },
           {
             headers: {
