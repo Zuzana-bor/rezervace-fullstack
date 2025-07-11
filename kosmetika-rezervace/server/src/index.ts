@@ -43,14 +43,43 @@ app.use(
 );
 const PORT = process.env.PORT || 5000;
 
-// GoSMS.cz integrace: Spouští se každý den v 10:35 (OAuth2 token-based autentizace)
-const GOSMS_ACCESS_TOKEN = process.env.GOSMS_ACCESS_TOKEN;
+let gosmsAccessToken = process.env.GOSMS_ACCESS_TOKEN;
 
+// Automatické obnovení tokenu každý den v 17:30
+cron.schedule('30 17 * * *', async () => {
+  try {
+    const resp = await axios.post(
+      'https://app.gosms.eu/oauth/v2/token',
+      `client_id=${process.env.GOSMS_LOGIN}&client_secret=${process.env.GOSMS_PASSWORD}&grant_type=client_credentials`,
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
+    );
+    gosmsAccessToken = resp.data.access_token;
+    console.log('GoSMS access token byl automaticky obnoven v 17:30.');
+  } catch (err) {
+    console.error(
+      'Chyba při automatickém obnovování GoSMS tokenu:',
+      err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        err.response &&
+        typeof err.response === 'object' &&
+        'data' in err.response
+        ? (err as any).response.data
+        : err && typeof err === 'object' && 'message' in err
+        ? (err as any).message
+        : String(err),
+    );
+  }
+});
+
+// GoSMS.cz integrace: Spouští se každý den v 11:15 (OAuth2 token-based autentizace)
 try {
-  cron.schedule('30 11 * * *', async () => {
+  cron.schedule('15 11 * * *', async () => {
     try {
-      if (!GOSMS_ACCESS_TOKEN) {
-        console.error('GOSMS_ACCESS_TOKEN není nastaven v .env!');
+      if (!gosmsAccessToken) {
+        console.error('GOSMS_ACCESS_TOKEN není nastaven v .env ani v paměti!');
         return;
       }
       // --- Získání kreditu před rozesláním SMS ---
@@ -59,7 +88,7 @@ try {
           'https://app.gosms.eu/selfservice/api/credit',
           {
             headers: {
-              Authorization: `Bearer ${GOSMS_ACCESS_TOKEN}`,
+              Authorization: `Bearer ${gosmsAccessToken}`,
               'Content-Type': 'application/json',
             },
           },
@@ -114,7 +143,7 @@ try {
 
         try {
           await axios.post(
-            `https://app.gosms.eu/api/v1/messages?access_token=${GOSMS_ACCESS_TOKEN}`,
+            `https://app.gosms.eu/api/v1/messages?access_token=${gosmsAccessToken}`,
             {
               message: text,
               recipients: [
@@ -166,7 +195,7 @@ app.get('/', (req, res) => {
 
 app.get('/api/test-sms', async (req, res) => {
   try {
-    if (!GOSMS_ACCESS_TOKEN) {
+    if (!gosmsAccessToken) {
       return res
         .status(500)
         .json({ error: 'GOSMS_ACCESS_TOKEN není nastaven!' });
@@ -198,7 +227,7 @@ app.get('/api/test-sms', async (req, res) => {
       const text = `Dobrý den, zítra v ${time} máte rezervaci (${serviceName}). Těším se na vás, Petra.`;
       try {
         await axios.post(
-          `https://app.gosms.eu/api/v1/messages?access_token=${GOSMS_ACCESS_TOKEN}`,
+          `https://app.gosms.eu/api/v1/messages?access_token=${gosmsAccessToken}`,
           {
             message: text,
             recipients: [
