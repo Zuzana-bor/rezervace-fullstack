@@ -50,6 +50,9 @@ const AdminDashboard = () => {
   );
   const [calendarKey, setCalendarKey] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editReservation, setEditReservation] = useState<any>(null);
+  const [editValues, setEditValues] = useState<any>({});
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -210,7 +213,15 @@ const AdminDashboard = () => {
                 </Typography>
                 <Typography>
                   <b>Čas rezervace:</b>{' '}
-                  {new Date(selectedReservation.date).toLocaleString()}
+                  {selectedReservation.date &&
+                    new Date(selectedReservation.date).toLocaleString('cs-CZ', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false,
+                    })}
                 </Typography>
                 <Typography>
                   <b>Vytvořeno:</b>{' '}
@@ -229,10 +240,144 @@ const AdminDashboard = () => {
               Zavřít
             </MuiButton>
             <MuiButton
+              color="primary"
+              onClick={() => {
+                setEditReservation(selectedReservation);
+                setEditValues({
+                  clientFirstName:
+                    selectedReservation.clientFirstName ||
+                    selectedReservation.userId?.firstName ||
+                    '',
+                  clientLastName:
+                    selectedReservation.clientLastName ||
+                    selectedReservation.userId?.lastName ||
+                    '',
+                  phone: selectedReservation.phone || '',
+                  service: selectedReservation.service || '',
+                  price: selectedReservation.price || '',
+                  date: selectedReservation.date
+                    ? new Date(selectedReservation.date)
+                        .toISOString()
+                        .slice(0, 16)
+                    : '',
+                });
+                setEditDialogOpen(true);
+              }}
+            >
+              Upravit
+            </MuiButton>
+            <MuiButton
               color="error"
               onClick={() => handleDeleteReservation(selectedReservation._id)}
             >
               Smazat rezervaci
+            </MuiButton>
+          </DialogActions>
+        </Dialog>
+
+        {/* Dialog pro úpravu rezervace */}
+        <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+          <DialogTitle>Upravit rezervaci</DialogTitle>
+          <DialogContent>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                minWidth: 300,
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Jméno"
+                value={editValues.clientFirstName}
+                onChange={(e) =>
+                  setEditValues((v: any) => ({
+                    ...v,
+                    clientFirstName: e.target.value,
+                  }))
+                }
+              />
+              <input
+                type="text"
+                placeholder="Příjmení"
+                value={editValues.clientLastName}
+                onChange={(e) =>
+                  setEditValues((v: any) => ({
+                    ...v,
+                    clientLastName: e.target.value,
+                  }))
+                }
+              />
+              <input
+                type="text"
+                placeholder="Telefon"
+                value={editValues.phone}
+                onChange={(e) =>
+                  setEditValues((v: any) => ({ ...v, phone: e.target.value }))
+                }
+              />
+              <input
+                type="text"
+                placeholder="Služba"
+                value={editValues.service}
+                onChange={(e) =>
+                  setEditValues((v: any) => ({ ...v, service: e.target.value }))
+                }
+              />
+              <input
+                type="number"
+                placeholder="Cena"
+                value={editValues.price}
+                onChange={(e) =>
+                  setEditValues((v: any) => ({ ...v, price: e.target.value }))
+                }
+              />
+              <input
+                type="datetime-local"
+                placeholder="Datum a čas"
+                value={editValues.date}
+                onChange={(e) =>
+                  setEditValues((v: any) => ({ ...v, date: e.target.value }))
+                }
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <MuiButton onClick={() => setEditDialogOpen(false)}>
+              Zrušit
+            </MuiButton>
+            <MuiButton
+              variant="contained"
+              onClick={async () => {
+                const token = localStorage.getItem('token');
+                await fetch(`/api/admin/appointments/${editReservation._id}`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    clientFirstName: editValues.clientFirstName,
+                    clientLastName: editValues.clientLastName,
+                    phone: editValues.phone,
+                    service: editValues.service,
+                    price: editValues.price,
+                    date: new Date(editValues.date).toISOString(),
+                  }),
+                });
+                setEditDialogOpen(false);
+                setSelectedReservation(null);
+                setCalendarKey((k) => k + 1);
+              }}
+              disabled={
+                !editValues.clientFirstName ||
+                !editValues.clientLastName ||
+                !editValues.service ||
+                !editValues.date
+              }
+            >
+              Uložit změny
             </MuiButton>
           </DialogActions>
         </Dialog>

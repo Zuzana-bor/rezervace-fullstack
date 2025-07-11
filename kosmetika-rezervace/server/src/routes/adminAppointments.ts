@@ -68,4 +68,39 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+// Úprava rezervace (admin)
+router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
+  const { clientFirstName, clientLastName, phone, service, price, date } =
+    req.body;
+  try {
+    // Najdi službu podle názvu (kvůli ceně a délce)
+    const foundService = await require('../models/Service').Service.findOne({
+      name: service,
+    });
+    if (!foundService) {
+      return res.status(400).json({ message: 'Služba nenalezena' });
+    }
+    const update: any = {
+      clientFirstName,
+      clientLastName,
+      clientPhone: phone,
+      service: foundService.name,
+      price: price || foundService.price,
+      duration: foundService.duration,
+      date: new Date(date),
+    };
+    const updated = await Appointment.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+    });
+    if (!updated)
+      return res.status(404).json({ message: 'Rezervace nenalezena' });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Chyba při úpravě rezervace',
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+});
+
 export default router;
