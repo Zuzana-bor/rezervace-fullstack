@@ -12,7 +12,7 @@ import {
   TextField,
 } from '@mui/material';
 import { getBlockedTimes } from '../api/blockedTimes';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 
 const AdminBlockedTimes = () => {
   const [times, setTimes] = useState([]);
@@ -39,8 +39,8 @@ const AdminBlockedTimes = () => {
       endVal = new Date(date.setHours(23, 59, 59, 999)).toISOString();
     }
     const token = localStorage.getItem('token');
-    await axios.post(
-      '/api/blocked-times',
+    await axiosInstance.post(
+      '/blocked-times',
       { start: startVal, end: endVal, allDay, note },
       { headers: { Authorization: `Bearer ${token}` } },
     );
@@ -61,7 +61,7 @@ const AdminBlockedTimes = () => {
 
   const handleDelete = async (id: string) => {
     const token = localStorage.getItem('token');
-    await axios.delete(`/api/blocked-times/${id}`, {
+    await axiosInstance.delete(`/blocked-times/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchTimes();
