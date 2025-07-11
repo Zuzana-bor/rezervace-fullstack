@@ -63,10 +63,19 @@ const AdminCalendar = ({
           }
         }}
         dateClick={(info) => {
-          // Pokud je v info.date čas (např. při kliknutí v timeGrid), použijeme ho
+          // Pomocná funkce pro převod Date na yyyy-MM-ddTHH:mm v lokálním čase
+          function toLocalDatetimeString(dateObj: Date) {
+            const pad = (n: number) => n.toString().padStart(2, '0');
+            const year = dateObj.getFullYear();
+            const month = pad(dateObj.getMonth() + 1);
+            const day = pad(dateObj.getDate());
+            const hours = pad(dateObj.getHours());
+            const minutes = pad(dateObj.getMinutes());
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+          }
           const dateObj = info.date;
-          const iso = dateObj.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
-          if (onDateClick) onDateClick(iso);
+          const localDatetime = toLocalDatetimeString(dateObj);
+          if (onDateClick) onDateClick(localDatetime);
         }}
       />
     </Paper>
