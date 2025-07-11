@@ -14,9 +14,6 @@ const cron = require('node-cron');
 import axios from 'axios';
 import { Appointment } from './models/Appointments';
 
-const GOSMS_LOGIN = process.env.GOSMS_LOGIN;
-const GOSMS_PASSWORD = process.env.GOSMS_PASSWORD;
-
 const app = express();
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -46,15 +43,50 @@ app.use(
 );
 const PORT = process.env.PORT || 5000;
 
-// Spouští se každý den v 18:00
+// GoSMS.cz integrace: Spouští se každý den v 18:00 (OAuth2 token-based autentizace)
+const GOSMS_ACCESS_TOKEN = process.env.GOSMS_ACCESS_TOKEN;
+
 try {
-  // TEST: Spouští se každý den ve 20:45 (pro testování SMS)
-  cron.schedule('45 20 * * *', async () => {
+  cron.schedule('0 18 * * *', async () => {
     try {
-      if (!GOSMS_LOGIN || !GOSMS_PASSWORD) {
-        console.error('GOSMS_LOGIN nebo GOSMS_PASSWORD není nastaveno v .env!');
+      if (!GOSMS_ACCESS_TOKEN) {
+        console.error('GOSMS_ACCESS_TOKEN není nastaven v .env!');
         return;
       }
+      // --- Získání kreditu před rozesláním SMS ---
+      try {
+        const creditResp = await axios.get(
+          'https://app.gosms.cz/api/v1/credit',
+          {
+            headers: {
+              Authorization: `Bearer ${GOSMS_ACCESS_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+        const credit = creditResp.data?.credit;
+        if (typeof credit === 'number' && credit < 10) {
+          console.warn(
+            `UPOZORNĚNÍ: Nízký kredit na GoSMS.cz účtu! Zbývá pouze ${credit} Kč.`,
+          );
+        }
+      } catch (err) {
+        let msg = '';
+        if (err && typeof err === 'object' && err !== null) {
+          const anyErr = err as any;
+          if (anyErr.response && anyErr.response.data) {
+            msg = anyErr.response.data;
+          } else if (anyErr.message) {
+            msg = anyErr.message;
+          } else {
+            msg = JSON.stringify(anyErr);
+          }
+        } else {
+          msg = String(err);
+        }
+        console.error('Nepodařilo se zjistit kredit na GoSMS.cz:', msg);
+      }
+      // --- Pokračuje rozesílání SMS ---
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
@@ -67,28 +99,39 @@ try {
       }).populate('userId');
 
       for (const appt of appointments) {
-        const user = appt.userId as { phone?: string } | null | undefined;
+        const user = appt.userId as
+          | { phone?: string; firstName?: string; lastName?: string }
+          | null
+          | undefined;
         const phone = user?.phone || appt.clientPhone;
+        const serviceName = appt.service || '';
         if (!phone) continue;
-
-        const text = `Připomínka: Zítra v ${new Date(
-          appt.date,
-        ).toLocaleTimeString('cs-CZ', {
+        const time = new Date(appt.date).toLocaleTimeString('cs-CZ', {
           hour: '2-digit',
           minute: '2-digit',
-        })} máte rezervaci u Petry Jamborové.`;
+        });
+        const text = `Dobrý den, zítra v ${time} máte rezervaci (${serviceName}). Těším se na vás, Petra.`;
 
         try {
-          await axios.post('https://app.gosms.cz/api/v1/message', {
-            login: GOSMS_LOGIN,
-            password: GOSMS_PASSWORD,
-            number: phone,
-            message: text,
-          });
+          await axios.post(
+            'https://app.gosms.cz/api/v1/message',
+            {
+              number: phone.startsWith('+')
+                ? phone
+                : `+420${phone.replace(/\s+/g, '')}`,
+              message: text,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${GOSMS_ACCESS_TOKEN}`,
+                'Content-Type': 'application/json',
+              },
+            },
+          );
           console.log(`SMS odeslána na ${phone}`);
         } catch (err: any) {
           console.error(
-            'Chyba při odesílání SMS:',
+            'Chyba při odesílání SMS přes GoSMS:',
             err?.response?.data || err.message,
           );
         }
