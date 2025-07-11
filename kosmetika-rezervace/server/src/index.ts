@@ -47,7 +47,7 @@ const PORT = process.env.PORT || 5000;
 const GOSMS_ACCESS_TOKEN = process.env.GOSMS_ACCESS_TOKEN;
 
 try {
-  cron.schedule('45 10 * * *', async () => {
+  cron.schedule('55 10 * * *', async () => {
     try {
       if (!GOSMS_ACCESS_TOKEN) {
         console.error('GOSMS_ACCESS_TOKEN není nastaven v .env!');
@@ -56,7 +56,7 @@ try {
       // --- Získání kreditu před rozesláním SMS ---
       try {
         const creditResp = await axios.get(
-          'https://app.gosms.cz/api/v1/credit',
+          'https://app.gosms.eu/selfservice/api/credit',
           {
             headers: {
               Authorization: `Bearer ${GOSMS_ACCESS_TOKEN}`,
@@ -114,7 +114,7 @@ try {
 
         try {
           await axios.post(
-            'https://app.gosms.cz/api/v1/message',
+            'https://app.gosms.eu/selfservice/api/message',
             {
               number: phone.startsWith('+')
                 ? phone
@@ -196,7 +196,7 @@ app.get('/api/test-sms', async (req, res) => {
       const text = `Dobrý den, zítra v ${time} máte rezervaci (${serviceName}). Těším se na vás, Petra.`;
       try {
         await axios.post(
-          'https://app.gosms.cz/api/v1/message',
+          'https://app.gosms.eu/selfservice/api/message',
           {
             number: phone.startsWith('+')
               ? phone
