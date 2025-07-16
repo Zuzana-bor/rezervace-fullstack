@@ -17,11 +17,19 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
 // Smazat rezervaci
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
+    console.log('DELETE request pro rezervaci ID:', req.params.id); // Debug log
+    console.log('User:', req.user); // Debug log
+
     const appointment = await Appointment.findByIdAndDelete(req.params.id);
-    if (!appointment)
+    if (!appointment) {
+      console.log('Rezervace nenalezena pro ID:', req.params.id); // Debug log
       return res.status(404).json({ message: 'Rezervace nenalezena' });
+    }
+
+    console.log('Rezervace úspěšně smazána:', appointment._id); // Debug log
     res.json({ message: 'Rezervace smazána' });
   } catch (err: any) {
+    console.error('Chyba při mazání rezervace:', err); // Debug log
     res
       .status(400)
       .json({ message: 'Chyba při mazání rezervace', error: err.message });

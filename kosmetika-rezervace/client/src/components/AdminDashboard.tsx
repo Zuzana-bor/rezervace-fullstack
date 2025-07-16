@@ -22,6 +22,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import BlockIcon from '@mui/icons-material/Block';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import AdminClients from './AdminClients';
 import AdminCalendar from './AdminCalendar';
 import AdminServices from './AdminServices';
@@ -41,6 +42,7 @@ const menu = [
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
   const [section, setSection] = useState('calendar');
   const [selectedReservation, setSelectedReservation] = useState<any | null>(
     null,
@@ -79,22 +81,25 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteReservation = async (id: string) => {
+    console.log('Mazání rezervace s ID:', id); // Debug log
     try {
       await axiosInstance.delete(`/admin/appointments/${id}`);
-      // Optimisticky odeber event z kalendáře (pokud by byl problém s refreshKey)
       setSelectedReservation(null);
       setCalendarKey((k) => k + 1);
+      console.log('Rezervace úspěšně smazána'); // Debug log
+      showToast('Rezervace byla úspěšně smazána', 'success');
     } catch (error: any) {
+      console.error('Chyba při mazání rezervace:', error); // Debug log
       const errorMessage =
         error?.response?.data?.message || error?.message || 'Neznámá chyba';
-      alert('Chyba při mazání rezervace: ' + errorMessage);
+      showToast('Chyba při mazání rezervace: ' + errorMessage, 'error');
     }
   };
 
   const drawer = (
     <>
       <Toolbar />
-      <List>
+      <List role="navigation" aria-label="Hlavní navigace">
         {menu.map((item) => (
           <ListItemButton
             key={item.key}
@@ -103,8 +108,9 @@ const AdminDashboard = () => {
               setSection(item.key);
               setMobileOpen(false);
             }}
+            aria-label={`Přejít na ${item.label}`}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemIcon aria-hidden="true">{item.icon}</ListItemIcon>
             <ListItemText primary={item.label} />
           </ListItemButton>
         ))}
@@ -119,7 +125,14 @@ const AdminDashboard = () => {
         <Toolbar>
           {/* Hamburger menu pro mobil */}
           <Box sx={{ display: { xs: 'block', md: 'none' }, mr: 2 }}>
-            <MenuIcon onClick={handleDrawerToggle} sx={{ cursor: 'pointer' }} />
+            <MuiButton
+              color="inherit"
+              aria-label="Otevřít navigační menu"
+              onClick={handleDrawerToggle}
+              sx={{ minWidth: 'auto', p: 1 }}
+            >
+              <MenuIcon />
+            </MuiButton>
           </Box>
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             Admin – {user?.firstName} {user?.lastName}
@@ -136,13 +149,13 @@ const AdminDashboard = () => {
               GoSMS kredit: {gosmsCredit} Kč
             </Typography>
           )}
-          <Typography
-            variant="body2"
-            sx={{ cursor: 'pointer' }}
+          <MuiButton
+            color="inherit"
             onClick={logout}
+            aria-label="Odhlásit se z administrace"
           >
             Odhlásit se
-          </Typography>
+          </MuiButton>
         </Toolbar>
       </AppBar>
       {/* Permanentní drawer pro desktop, temporary pro mobil */}
@@ -154,7 +167,10 @@ const AdminDashboard = () => {
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
+          ModalProps={{
+            keepMounted: true,
+            'aria-labelledby': 'mobile-navigation',
+          }}
           sx={{
             display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': {
@@ -163,6 +179,7 @@ const AdminDashboard = () => {
               background: '#f9f7f4',
             },
           }}
+          aria-label="Navigační menu"
         >
           {drawer}
         </Drawer>
@@ -179,6 +196,7 @@ const AdminDashboard = () => {
             },
           }}
           open
+          aria-label="Navigační menu"
         >
           {drawer}
         </Drawer>
@@ -398,12 +416,16 @@ const AdminDashboard = () => {
                   setEditDialogOpen(false);
                   setSelectedReservation(null);
                   setCalendarKey((k) => k + 1);
+                  showToast('Rezervace byla úspěšně upravena', 'success');
                 } catch (error: any) {
                   const errorMessage =
                     error?.response?.data?.message ||
                     error?.message ||
                     'Neznámá chyba';
-                  alert('Chyba při úpravě rezervace: ' + errorMessage);
+                  showToast(
+                    'Chyba při úpravě rezervace: ' + errorMessage,
+                    'error',
+                  );
                 }
               }}
               disabled={

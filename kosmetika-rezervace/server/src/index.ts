@@ -9,6 +9,7 @@ import servicesRouter from './routes/services';
 import blockedTimesRouter from './routes/blockedTimes';
 import adminAppointmentsRouter from './routes/adminAppointments';
 import adminUsersRouter from './routes/adminUsers';
+import { requireAuth } from './middleware/auth';
 // @ts-ignore
 const cron = require('node-cron');
 import axios from 'axios';
@@ -221,6 +222,15 @@ app.listen(PORT, () => {
 
 app.get('/', (req, res) => {
   res.send('Server běží!');
+});
+
+// Test endpoint pro debug
+app.get('/api/debug/auth', requireAuth, (req, res) => {
+  res.json({
+    message: 'Autentizace funguje',
+    user: req.user,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.get('/api/test-sms', async (req, res) => {
