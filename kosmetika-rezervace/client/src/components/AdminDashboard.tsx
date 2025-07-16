@@ -28,6 +28,7 @@ import AdminServices from './AdminServices';
 import AdminBlockedTimes from './AdminBlockedTimes';
 import AdminNewAppointment from './AdminNewAppointment';
 import { getGoSmsCredit } from '../api/gosms';
+import axiosInstance from '../api/axios';
 
 const drawerWidth = 240;
 
@@ -78,21 +79,15 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteReservation = async (id: string) => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/admin/appointments/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
+    try {
+      await axiosInstance.delete(`/admin/appointments/${id}`);
       // Optimisticky odeber event z kalendáře (pokud by byl problém s refreshKey)
       setSelectedReservation(null);
       setCalendarKey((k) => k + 1);
-    } else {
-      const data = await res.json().catch(() => ({}));
-      alert(
-        'Chyba při mazání rezervace: ' +
-          (data.message || res.statusText || 'Neznámá chyba'),
-      );
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || 'Neznámá chyba';
+      alert('Chyba při mazání rezervace: ' + errorMessage);
     }
   };
 
@@ -388,25 +383,28 @@ const AdminDashboard = () => {
             <MuiButton
               variant="contained"
               onClick={async () => {
-                const token = localStorage.getItem('token');
-                await fetch(`/api/admin/appointments/${editReservation._id}`, {
-                  method: 'PUT',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    clientFirstName: editValues.clientFirstName,
-                    clientLastName: editValues.clientLastName,
-                    phone: editValues.phone,
-                    service: editValues.service,
-                    price: editValues.price,
-                    date: new Date(editValues.date).toISOString(),
-                  }),
-                });
-                setEditDialogOpen(false);
-                setSelectedReservation(null);
-                setCalendarKey((k) => k + 1);
+                try {
+                  await axiosInstance.put(
+                    `/admin/appointments/${editReservation._id}`,
+                    {
+                      clientFirstName: editValues.clientFirstName,
+                      clientLastName: editValues.clientLastName,
+                      phone: editValues.phone,
+                      service: editValues.service,
+                      price: editValues.price,
+                      date: new Date(editValues.date).toISOString(),
+                    },
+                  );
+                  setEditDialogOpen(false);
+                  setSelectedReservation(null);
+                  setCalendarKey((k) => k + 1);
+                } catch (error: any) {
+                  const errorMessage =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    'Neznámá chyba';
+                  alert('Chyba při úpravě rezervace: ' + errorMessage);
+                }
               }}
               disabled={
                 !editValues.clientFirstName ||

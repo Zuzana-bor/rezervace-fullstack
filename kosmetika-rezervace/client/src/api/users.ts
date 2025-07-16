@@ -9,16 +9,7 @@ export type User = {
   role: string;
 };
 
-function getToken() {
-  return localStorage.getItem('token');
-}
-
 export const getUsers = async () => {
-  const token = getToken();
-  const res = await axiosInstance.get('/admin/users', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await axiosInstance.get('/admin/users');
   return res.data;
 };

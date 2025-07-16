@@ -38,12 +38,12 @@ const AdminBlockedTimes = () => {
       startVal = new Date(date.setHours(0, 0, 0, 0)).toISOString();
       endVal = new Date(date.setHours(23, 59, 59, 999)).toISOString();
     }
-    const token = localStorage.getItem('token');
-    await axiosInstance.post(
-      '/blocked-times',
-      { start: startVal, end: endVal, allDay, note },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    await axiosInstance.post('/blocked-times', {
+      start: startVal,
+      end: endVal,
+      allDay,
+      note,
+    });
     setStart('');
     setEnd('');
     setAllDay(false);
@@ -60,10 +60,7 @@ const AdminBlockedTimes = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const token = localStorage.getItem('token');
-    await axiosInstance.delete(`/blocked-times/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await axiosInstance.delete(`/blocked-times/${id}`);
     fetchTimes();
   };
 

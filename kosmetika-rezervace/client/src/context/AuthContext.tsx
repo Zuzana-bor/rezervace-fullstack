@@ -20,8 +20,10 @@ export type User = {
 export type AuthContextType = {
   user: User | null;
   token: string | null;
+  loading: boolean;
   login: (userData: User, token: string) => void;
   logout: () => void;
+  isAuthenticated: boolean;
 };
 
 // 3️⃣ Výchozí hodnota contextu
@@ -31,16 +33,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Načti uživatele a token z localStorage při načtení
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    if (storedToken) {
-      setToken(storedToken);
+    try {
+      const storedUser = localStorage.getItem('user');
+      const storedToken = localStorage.getItem('token');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+      if (storedToken) {
+        setToken(storedToken);
+      }
+    } catch (error) {
+      console.error('Chyba při načítání z localStorage:', error);
+      // Vymaž poškozená data
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -64,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (userData: User, token: string) => {
     setUser(userData);
     setToken(token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    // localStorage se automaticky aktualizuje přes useEffect
   };
 
   const logout = () => {
@@ -72,8 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
   };
 
+  const isAuthenticated = !!(user && token);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, login, logout, isAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );

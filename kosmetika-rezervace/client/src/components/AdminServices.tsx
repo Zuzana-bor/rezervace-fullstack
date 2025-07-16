@@ -38,12 +38,11 @@ const AdminServices = () => {
   }, []);
 
   const handleAdd = async () => {
-    const token = localStorage.getItem('token');
-    await axiosInstance.post(
-      '/services',
-      { name, price: Number(price), duration: Number(duration) },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    await axiosInstance.post('/services', {
+      name,
+      price: Number(price),
+      duration: Number(duration),
+    });
     setName('');
     setPrice('');
     setDuration('');
@@ -51,10 +50,7 @@ const AdminServices = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const token = localStorage.getItem('token');
-    await axiosInstance.delete(`/services/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await axiosInstance.delete(`/services/${id}`);
     fetchServices();
   };
 
@@ -160,16 +156,11 @@ const AdminServices = () => {
           <Button
             variant="contained"
             onClick={async () => {
-              const token = localStorage.getItem('token');
-              await axiosInstance.put(
-                `/services/${editService._id}`,
-                {
-                  name: editName,
-                  price: Number(editPrice),
-                  duration: Number(editDuration),
-                },
-                { headers: { Authorization: `Bearer ${token}` } },
-              );
+              await axiosInstance.put(`/services/${editService._id}`, {
+                name: editName,
+                price: Number(editPrice),
+                duration: Number(editDuration),
+              });
               setEditDialogOpen(false);
               fetchServices();
             }}

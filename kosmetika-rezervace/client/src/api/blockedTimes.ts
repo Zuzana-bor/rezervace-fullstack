@@ -8,16 +8,7 @@ export type BlockedTime = {
   note?: string;
 };
 
-function getToken() {
-  return localStorage.getItem('token');
-}
-
 export const getBlockedTimes = async () => {
-  const token = getToken();
-  const res = await axiosInstance.get('/blocked-times', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await axiosInstance.get('/blocked-times');
   return res.data;
 };

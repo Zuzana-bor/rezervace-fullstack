@@ -8,17 +8,7 @@ export type Appointment = {
   duration?: number;
 };
 
-// Pomocná funkce pro získání tokenu
-function getToken() {
-  return localStorage.getItem('token');
-}
-
 export const getAllAppointments = async (): Promise<Appointment[]> => {
-  const token = getToken();
-  const res = await axiosInstance.get('/admin/appointments', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await axiosInstance.get('/admin/appointments');
   return Array.isArray(res.data) ? res.data : res.data.appointments;
 };

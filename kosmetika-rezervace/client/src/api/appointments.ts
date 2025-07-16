@@ -8,28 +8,13 @@ export type Appointment = {
   price: number;
 };
 
-// Pomocná funkce pro získání tokenu
-function getToken() {
-  return localStorage.getItem('token');
-}
-
 export const getMyAppointments = async (): Promise<Appointment[]> => {
-  const token = getToken();
-  const res = await axiosInstance.get('/appointments/me', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const res = await axiosInstance.get('/appointments/me');
   return Array.isArray(res.data) ? res.data : res.data.appointments;
 };
 
 export const deleteAppointment = async (id: string): Promise<void> => {
-  const token = getToken();
-  await axiosInstance.delete(`/appointments/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  await axiosInstance.delete(`/appointments/${id}`);
 };
 
 export const createAppointment = async ({
@@ -39,16 +24,7 @@ export const createAppointment = async ({
   date: string;
   service: string;
 }) => {
-  const token = getToken();
-  await axiosInstance.post(
-    '/appointments/me',
-    { date, service },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+  await axiosInstance.post('/appointments/me', { date, service });
 };
 
 export const createAppointmentAdmin = async ({
@@ -64,14 +40,11 @@ export const createAppointmentAdmin = async ({
   lastName: string;
   clientPhone: string;
 }) => {
-  const token = getToken();
-  await axiosInstance.post(
-    '/admin/appointments',
-    { date, service, firstName, lastName, clientPhone },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+  await axiosInstance.post('/admin/appointments', {
+    date,
+    service,
+    firstName,
+    lastName,
+    clientPhone,
+  });
 };
