@@ -172,7 +172,7 @@ try {
           hour: '2-digit',
           minute: '2-digit',
         });
-        const text = `Dobrý den, zítra v ${time} máte rezervaci (${serviceName}). Těším se na vás, Petra.`;
+        const text = `Dobrý den, zítra v ${time} máte rezervaci na ${serviceName}. Těším se na vás, Petra.`;
 
         try {
           await axios.post(
@@ -277,7 +277,7 @@ app.get('/api/test-sms', async (req, res) => {
         hour: '2-digit',
         minute: '2-digit',
       });
-      const text = `Dobrý den, zítra v ${time} máte rezervaci (${serviceName}). Těším se na vás, Petra.`;
+      const text = `Dobrý den, zítra v ${time} máte rezervaci na ${serviceName}. Těším se na vás, Petra.`;
       try {
         await axios.post(
           `https://app.gosms.eu/api/v1/messages?access_token=${gosmsAccessToken}`,
