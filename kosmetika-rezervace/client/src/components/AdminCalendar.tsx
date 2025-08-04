@@ -31,14 +31,14 @@ const AdminCalendar = ({
       setRawEvents(r);
       setEvents(
         r.map((a: any) => {
-          // Získej jméno klientky - buď z userId (registrované uživatelky) nebo z firstName/lastName (admin rezervace)
+          // Získej jméno klientky - buď z userId (registrované uživatelky) nebo z clientFirstName/clientLastName (admin rezervace)
           let clientName = '';
           if (a.userId && typeof a.userId === 'object') {
             // Registrovaná uživatelka
             clientName = `${a.userId.firstName || ''} ${a.userId.lastName || ''}`.trim();
-          } else if (a.firstName && a.lastName) {
+          } else if (a.clientFirstName && a.clientLastName) {
             // Admin rezervace
-            clientName = `${a.firstName} ${a.lastName}`;
+            clientName = `${a.clientFirstName} ${a.clientLastName}`;
           } else {
             clientName = 'Neznámý klient';
           }
