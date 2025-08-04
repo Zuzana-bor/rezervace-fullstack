@@ -200,7 +200,9 @@ try {
           );
         }
       }
-      console.log(`✅ SMS rozeslání dokončeno. Odesláno ${appointments.length} zpráv.`);
+      console.log(
+        `✅ SMS rozeslání dokončeno. Odesláno ${appointments.length} zpráv.`,
+      );
     } catch (err) {
       console.error('Chyba v cron úloze GoSMS:', err);
     }
@@ -240,18 +242,16 @@ app.get('/api/test-sms', async (req, res) => {
   try {
     console.log('🧪 Test SMS endpoint volán');
     console.log('GOSMS token status:', !!gosmsAccessToken);
-    
+
     if (!gosmsAccessToken) {
       console.log('❌ GOSMS token není dostupný');
-      return res
-        .status(500)
-        .json({ 
-          error: 'GOSMS_ACCESS_TOKEN není nastaven!',
-          debug: {
-            hasToken: false,
-            envCheck: !!process.env.GOSMS_ACCESS_TOKEN
-          }
-        });
+      return res.status(500).json({
+        error: 'GOSMS_ACCESS_TOKEN není nastaven!',
+        debug: {
+          hasToken: false,
+          envCheck: !!process.env.GOSMS_ACCESS_TOKEN,
+        },
+      });
     }
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
