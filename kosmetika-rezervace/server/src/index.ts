@@ -106,10 +106,10 @@ cron.schedule('30 17 * * *', async () => {
   }
 });
 
-// GoSMS.cz integrace: Spouští se každý den v 18:00 (OAuth2 token-based autentizace)
+// GoSMS.cz integrace: Spouští se každý den v 20:45 (OAuth2 token-based autentizace)
 try {
-  cron.schedule('00 18 * * *', async () => {
-    console.log('🕕 Spouští se cron úloha pro SMS v 18:00');
+  cron.schedule('45 20 * * *', async () => {
+    console.log('� Spouští se cron úloha pro SMS v 20:45');
     try {
       if (!gosmsAccessToken) {
         console.error('GOSMS_ACCESS_TOKEN není nastaven v .env ani v paměti!');
