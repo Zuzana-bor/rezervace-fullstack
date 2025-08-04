@@ -34,16 +34,21 @@ const AdminClients = () => {
   // Funkce pro vyhledávání
   const handleSearchChange = (event: any, newValue: any) => {
     setSearchValue(newValue);
-    
+
     if (!newValue || newValue === '') {
       setFilteredUsers(users);
     } else {
       const filtered = users.filter((user: any) => {
         const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-        const searchTerm = typeof newValue === 'string' ? newValue.toLowerCase() : newValue.label?.toLowerCase() || '';
-        return fullName.includes(searchTerm) || 
-               user.email?.toLowerCase().includes(searchTerm) ||
-               user.phone?.includes(searchTerm);
+        const searchTerm =
+          typeof newValue === 'string'
+            ? newValue.toLowerCase()
+            : newValue.label?.toLowerCase() || '';
+        return (
+          fullName.includes(searchTerm) ||
+          user.email?.toLowerCase().includes(searchTerm) ||
+          user.phone?.includes(searchTerm)
+        );
       });
       setFilteredUsers(filtered);
     }
@@ -54,7 +59,7 @@ const AdminClients = () => {
     label: `${user.firstName} ${user.lastName}`,
     email: user.email,
     phone: user.phone,
-    user: user
+    user: user,
   }));
 
   return (
@@ -65,7 +70,7 @@ const AdminClients = () => {
       >
         Klientky
       </Typography>
-      
+
       {/* Vyhledávací pole */}
       <Box sx={{ mb: 3 }}>
         <Autocomplete
@@ -76,7 +81,7 @@ const AdminClients = () => {
           onInputChange={(event, newInputValue) => {
             handleSearchChange(event, newInputValue);
           }}
-          getOptionLabel={(option) => 
+          getOptionLabel={(option) =>
             typeof option === 'string' ? option : option.label || ''
           }
           renderOption={(props, option) => (
