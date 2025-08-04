@@ -46,7 +46,9 @@ const AdminClients = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchValue, setSearchValue] = useState<any>(null);
   const [selectedClient, setSelectedClient] = useState<any>(null);
-  const [clientAppointments, setClientAppointments] = useState<Appointment[]>([]);
+  const [clientAppointments, setClientAppointments] = useState<Appointment[]>(
+    [],
+  );
   const [showClientDetail, setShowClientDetail] = useState(false);
   const [showNewAppointment, setShowNewAppointment] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<any>(null);
@@ -97,8 +99,9 @@ const AdminClients = () => {
     try {
       const allAppointments = await getAllAppointments();
       // Filtrujeme rezervace pro danou klientku
-      const clientAppointments = allAppointments.filter((apt: any) => 
-        apt.userId?._id === client._id || apt.userId === client._id
+      const clientAppointments = allAppointments.filter(
+        (apt: any) =>
+          apt.userId?._id === client._id || apt.userId === client._id,
       );
       setClientAppointments(clientAppointments);
     } catch (error) {
@@ -118,8 +121,8 @@ const AdminClients = () => {
   // Pomocná funkce pro načtení klientských rezervací
   const loadClientAppointments = async (clientId: string) => {
     const allAppointments = await getAllAppointments();
-    return allAppointments.filter((apt: any) => 
-      apt.userId?._id === clientId || apt.userId === clientId
+    return allAppointments.filter(
+      (apt: any) => apt.userId?._id === clientId || apt.userId === clientId,
     );
   };
 
@@ -128,7 +131,9 @@ const AdminClients = () => {
     if (window.confirm('Opravdu chcete smazat tuto rezervaci?')) {
       try {
         await deleteAppointment(appointmentId);
-        const updatedAppointments = await loadClientAppointments(selectedClient._id);
+        const updatedAppointments = await loadClientAppointments(
+          selectedClient._id,
+        );
         setClientAppointments(updatedAppointments);
         showToast('Rezervace byla úspěšně smazána', 'success');
       } catch (error) {
@@ -151,7 +156,9 @@ const AdminClients = () => {
   const handleAppointmentCreated = async () => {
     setShowNewAppointment(false);
     if (selectedClient) {
-      const updatedAppointments = await loadClientAppointments(selectedClient._id);
+      const updatedAppointments = await loadClientAppointments(
+        selectedClient._id,
+      );
       setClientAppointments(updatedAppointments);
     }
   };
@@ -235,14 +242,14 @@ const AdminClients = () => {
           </TableHead>
           <TableBody>
             {filteredUsers.map((u: any) => (
-              <TableRow 
-                key={u.id} 
+              <TableRow
+                key={u.id}
                 hover
-                sx={{ 
+                sx={{
                   cursor: 'pointer',
                   '&:hover': {
                     backgroundColor: 'rgba(47, 108, 58, 0.1)',
-                  }
+                  },
                 }}
                 onClick={() => handleClientClick(u)}
               >
@@ -268,13 +275,19 @@ const AdminClients = () => {
       )}
 
       {/* Modal s detailem klientky */}
-      <Dialog 
-        open={showClientDetail} 
+      <Dialog
+        open={showClientDetail}
         onClose={handleCloseDetail}
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <PersonIcon sx={{ color: '#2f6c3a' }} />
             <Typography variant="h6">
@@ -285,7 +298,7 @@ const AdminClients = () => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        
+
         <DialogContent>
           {/* Kontaktní informace */}
           <Box sx={{ mb: 3 }}>
@@ -309,7 +322,14 @@ const AdminClients = () => {
           <Divider sx={{ my: 2 }} />
 
           {/* Rezervace */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+            }}
+          >
             <Typography variant="h6" sx={{ color: '#2f6c3a' }}>
               Rezervace ({clientAppointments.length})
             </Typography>
@@ -317,9 +337,9 @@ const AdminClients = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleNewAppointment}
-              sx={{ 
+              sx={{
                 backgroundColor: '#2f6c3a',
-                '&:hover': { backgroundColor: '#235231' }
+                '&:hover': { backgroundColor: '#235231' },
               }}
             >
               Nová rezervace
@@ -334,23 +354,30 @@ const AdminClients = () => {
           ) : (
             <List>
               {clientAppointments.map((appointment: any) => (
-                <ListItem 
+                <ListItem
                   key={appointment._id}
-                  sx={{ 
+                  sx={{
                     border: '1px solid #e0e0e0',
                     borderRadius: 2,
                     mb: 1,
-                    backgroundColor: 'rgba(47, 108, 58, 0.05)'
+                    backgroundColor: 'rgba(47, 108, 58, 0.05)',
                   }}
                 >
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <CalendarTodayIcon sx={{ color: '#2f6c3a', fontSize: 20 }} />
-                        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <CalendarTodayIcon
+                          sx={{ color: '#2f6c3a', fontSize: 20 }}
+                        />
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 500 }}
+                        >
                           {appointment.service}
                         </Typography>
-                        <Chip 
+                        <Chip
                           label={`${appointment.price} Kč`}
                           size="small"
                           sx={{ backgroundColor: '#2f6c3a', color: 'white' }}
@@ -365,7 +392,7 @@ const AdminClients = () => {
                           month: 'long',
                           day: 'numeric',
                           hour: '2-digit',
-                          minute: '2-digit'
+                          minute: '2-digit',
                         })}
                       </Typography>
                     }
@@ -389,12 +416,18 @@ const AdminClients = () => {
 
       {/* Modal pro novou rezervaci */}
       {showNewAppointment && selectedClient && (
-        <Dialog open={showNewAppointment} onClose={handleCloseNewAppointment} maxWidth="md" fullWidth>
+        <Dialog
+          open={showNewAppointment}
+          onClose={handleCloseNewAppointment}
+          maxWidth="md"
+          fullWidth
+        >
           <DialogTitle>
-            Nová rezervace pro {selectedClient.firstName} {selectedClient.lastName}
+            Nová rezervace pro {selectedClient.firstName}{' '}
+            {selectedClient.lastName}
           </DialogTitle>
           <DialogContent>
-            <AdminNewAppointment 
+            <AdminNewAppointment
               onCreated={handleAppointmentCreated}
               prefilledClient={{
                 firstName: selectedClient.firstName,
