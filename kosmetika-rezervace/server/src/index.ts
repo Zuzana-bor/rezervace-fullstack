@@ -77,8 +77,8 @@ async function refreshGoSmsToken() {
 }
 refreshGoSmsToken();
 
-// Automatické obnovení tokenu každý den v 19:10 (TEST)
-cron.schedule('10 19 * * *', async () => {
+// Automatické obnovení tokenu každý den v 15:30 UTC (17:30 český čas v létě)
+cron.schedule('30 15 * * *', async () => {
   try {
     const resp = await axios.post(
       'https://app.gosms.eu/oauth/v2/token',
@@ -88,7 +88,9 @@ cron.schedule('10 19 * * *', async () => {
       },
     );
     gosmsAccessToken = resp.data.access_token;
-    console.log('GoSMS access token byl automaticky obnoven v 19:10 (TEST).');
+    console.log(
+      'GoSMS access token byl automaticky obnoven v 15:30 UTC (17:30 český čas).',
+    );
   } catch (err) {
     console.error(
       'Chyba při automatickém obnovování GoSMS tokenu:',
@@ -106,10 +108,12 @@ cron.schedule('10 19 * * *', async () => {
   }
 });
 
-// GoSMS.cz integrace: Spouští se každý den v 19:40 (TEST)
+// GoSMS.cz integrace: Spouští se každý den v 16:00 UTC (18:00 český čas v létě)
 try {
-  cron.schedule('40 19 * * *', async () => {
-    console.log('🕕 Spouští se cron úloha pro SMS v 19:40 (TEST)');
+  cron.schedule('00 16 * * *', async () => {
+    console.log(
+      '🕕 Spouští se cron úloha pro SMS v 16:00 UTC (18:00 český čas)',
+    );
     try {
       if (!gosmsAccessToken) {
         console.error('GOSMS_ACCESS_TOKEN není nastaven v .env ani v paměti!');
