@@ -30,27 +30,13 @@ const AdminCalendar = ({
     getAllAppointments().then((r) => {
       setRawEvents(r);
       setEvents(
-        r.map((a: any) => {
-          // Získej jméno klientky - buď z userId (registrované uživatelky) nebo z clientFirstName/clientLastName (admin rezervace)
-          let clientName = '';
-          if (a.userId && typeof a.userId === 'object') {
-            // Registrovaná uživatelka
-            clientName = `${a.userId.firstName || ''} ${a.userId.lastName || ''}`.trim();
-          } else if (a.clientFirstName && a.clientLastName) {
-            // Admin rezervace
-            clientName = `${a.clientFirstName} ${a.clientLastName}`;
-          } else {
-            clientName = 'Neznámý klient';
-          }
-
-          return {
-            id: a._id, // FullCalendar potřebuje id
-            title: `${a.service} – ${clientName}`,
-            start: a.date,
-            _id: a._id, // přidej _id explicitně
-            ...a, // předej celé appointment pro detail/mazání
-          };
-        }),
+        r.map((a: any) => ({
+          id: a._id, // FullCalendar potřebuje id
+          title: `${a.service} – ${a.userId?.name || ''}`,
+          start: a.date,
+          _id: a._id, // přidej _id explicitně
+          ...a, // předej celé appointment pro detail/mazání
+        })),
       );
     });
   }, [refreshKey]);
