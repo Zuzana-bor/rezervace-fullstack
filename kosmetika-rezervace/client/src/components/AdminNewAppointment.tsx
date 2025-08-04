@@ -12,11 +12,17 @@ import { useAuth } from '../context/AuthContext';
 interface AdminNewAppointmentProps {
   onCreated: () => void;
   defaultDate?: string | null;
+  prefilledClient?: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+  };
 }
 
 const AdminNewAppointment = ({
   onCreated,
   defaultDate,
+  prefilledClient,
 }: AdminNewAppointmentProps) => {
   const { user } = useAuth();
   const [date, setDate] = useState(() => {
@@ -30,9 +36,9 @@ const AdminNewAppointment = ({
   const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
   const [allAppointments, setAllAppointments] = useState<AnyAppointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
+  const [firstName, setFirstName] = useState(prefilledClient?.firstName || '');
+  const [lastName, setLastName] = useState(prefilledClient?.lastName || '');
+  const [clientPhone, setClientPhone] = useState(prefilledClient?.phone || '');
 
   useEffect(() => {
     let isMounted = true;
@@ -78,6 +84,15 @@ const AdminNewAppointment = ({
       setDate(defaultDate.includes('T') ? defaultDate : defaultDate + 'T10:00');
     }
   }, [defaultDate]);
+
+  // Aktualizace předvyplněných údajů klientky
+  useEffect(() => {
+    if (prefilledClient) {
+      setFirstName(prefilledClient.firstName || '');
+      setLastName(prefilledClient.lastName || '');
+      setClientPhone(prefilledClient.phone || '');
+    }
+  }, [prefilledClient]);
 
   const isOverlapping = () => {
     if (!date || !service) return false;

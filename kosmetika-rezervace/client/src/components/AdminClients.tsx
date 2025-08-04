@@ -394,7 +394,14 @@ const AdminClients = () => {
             Nová rezervace pro {selectedClient.firstName} {selectedClient.lastName}
           </DialogTitle>
           <DialogContent>
-            <AdminNewAppointment onCreated={handleAppointmentCreated} />
+            <AdminNewAppointment 
+              onCreated={handleAppointmentCreated}
+              prefilledClient={{
+                firstName: selectedClient.firstName,
+                lastName: selectedClient.lastName,
+                phone: selectedClient.phone || '',
+              }}
+            />
           </DialogContent>
         </Dialog>
       )}
