@@ -26,9 +26,11 @@ const Profile = () => {
       const data = await import('../api/appointments').then((m) =>
         m.getMyAppointments(),
       );
+      console.log('✅ Loaded appointments:', data);
       setAppointments(data);
       setError('');
     } catch (err) {
+      console.error('❌ Error loading appointments:', err);
       setError('Chyba při načítání rezervací. Jste přihlášeni?');
     }
   };
