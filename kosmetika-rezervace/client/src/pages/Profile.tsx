@@ -35,7 +35,7 @@ const Profile = () => {
 
   useEffect(() => {
     refreshAppointments();
-  }, []);
+  }, [user]);
 
   if (!user) {
     return (
