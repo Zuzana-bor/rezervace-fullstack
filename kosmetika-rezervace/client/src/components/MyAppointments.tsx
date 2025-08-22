@@ -14,35 +14,24 @@ interface MyAppointmentsProps {
   error?: string;
 }
 
-const MyAppointments = ({
-  appointments: propAppointments,
-  error: propError,
-}: MyAppointmentsProps) => {
-  const [appointments, setAppointments] = useState<Appointment[]>(
-    propAppointments || [],
-  );
-  const [error, setError] = useState<string>(propError || '');
-
-  useEffect(() => {
-    getMyAppointments()
-      .then(setAppointments)
-      .catch((e) => setError('Chyba při načítání rezervací'));
-  }, []);
-
+const MyAppointments = ({ appointments, error }: MyAppointmentsProps) => {
   if (error) {
     return <div style={{ color: 'red' }}>{error}</div>;
   }
 
   return (
     <List>
-      {appointments.map((app) => (
-        <ListItem key={app._id}>
-          <ListItemText
-            primary={`${new Date(app.date).toLocaleString()} – ${app.service}`}
-            secondary={`Cena: ${app.price} Kč`}
-          />
-        </ListItem>
-      ))}
+      {appointments &&
+        appointments.map((app) => (
+          <ListItem key={app._id}>
+            <ListItemText
+              primary={`${new Date(app.date).toLocaleString()} – ${
+                app.service
+              }`}
+              secondary={`Cena: ${app.price} Kč`}
+            />
+          </ListItem>
+        ))}
     </List>
   );
 };
