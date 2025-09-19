@@ -54,7 +54,15 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     }
     const price = foundService.price;
     const duration = foundService.duration;
-    const start = new Date(date);
+    // Přidej timezone offset pro český čas, pokud není specifikován
+    const dateString =
+      date.includes('T') &&
+      !date.includes('Z') &&
+      !date.includes('+') &&
+      !date.includes('-')
+        ? date + '+02:00'
+        : date;
+    const start = new Date(dateString);
     // Vytvoř rezervaci bez userId, ale s jménem, příjmením a telefonem klientky
     const appointment = new Appointment({
       date: start,
@@ -95,7 +103,15 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       service: foundService.name,
       price: price || foundService.price,
       duration: foundService.duration,
-      date: new Date(date),
+      // Přidej timezone offset pro český čas, pokud není specifikován
+      date: new Date(
+        date.includes('T') &&
+        !date.includes('Z') &&
+        !date.includes('+') &&
+        !date.includes('-')
+          ? date + '+02:00'
+          : date,
+      ),
     };
     const updated = await Appointment.findByIdAndUpdate(req.params.id, update, {
       new: true,

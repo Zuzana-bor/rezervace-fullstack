@@ -49,6 +49,7 @@ const AdminCalendar = ({
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
+        firstDay={1}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',

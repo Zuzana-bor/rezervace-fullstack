@@ -23,7 +23,15 @@ router.post('/me', requireAuth, async (req, res) => {
     }
     const price = foundService.price;
     const duration = foundService.duration;
-    const start = new Date(date);
+    // Přidej timezone offset pro český čas, pokud není specifikován
+    const dateString =
+      date.includes('T') &&
+      !date.includes('Z') &&
+      !date.includes('+') &&
+      !date.includes('-')
+        ? date + '+02:00'
+        : date;
+    const start = new Date(dateString);
     const end = new Date(start.getTime() + duration * 60000);
     // Zkontroluj kolize s existujícími rezervacemi
     const conflict = await Appointment.findOne({
