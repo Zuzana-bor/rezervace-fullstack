@@ -1,6 +1,8 @@
 import { getMyAppointments } from '../api/appointments';
 import { useEffect, useState } from 'react';
 import { List, ListItem, ListItemText } from '@mui/material';
+import { format } from 'date-fns';
+import { cs } from 'date-fns/locale';
 
 type Appointment = {
   _id: string;
@@ -25,9 +27,9 @@ const MyAppointments = ({ appointments, error }: MyAppointmentsProps) => {
         appointments.map((app) => (
           <ListItem key={app._id}>
             <ListItemText
-              primary={`${new Date(app.date).toLocaleString()} – ${
-                app.service
-              }`}
+              primary={`${format(new Date(app.date), 'dd. MMMM yyyy v HH:mm', {
+                locale: cs,
+              })} – ${app.service}`}
               secondary={`Cena: ${app.price} Kč`}
             />
           </ListItem>

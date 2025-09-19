@@ -39,6 +39,8 @@ import { getAllAppointments, Appointment } from '../api/appointmentsAll';
 import { deleteAppointment } from '../api/appointments';
 import { useToast } from '../context/ToastContext';
 import AdminNewAppointment from './AdminNewAppointment';
+import { format } from 'date-fns';
+import cs from 'date-fns/locale/cs';
 
 const AdminClients = () => {
   const { showToast } = useToast();
@@ -386,14 +388,11 @@ const AdminClients = () => {
                     }
                     secondary={
                       <Typography variant="body2" color="text.secondary">
-                        {new Date(appointment.date).toLocaleString('cs-CZ', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {format(
+                          new Date(appointment.date),
+                          'dd. MMMM yyyy v HH:mm',
+                          { locale: cs },
+                        )}
                       </Typography>
                     }
                   />
