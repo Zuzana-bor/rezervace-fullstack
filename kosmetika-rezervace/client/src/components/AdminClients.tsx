@@ -245,7 +245,7 @@ const AdminClients = () => {
           <TableBody>
             {filteredUsers.map((u: any) => (
               <TableRow
-                key={u.id}
+                key={u._id}
                 hover
                 sx={{
                   cursor: 'pointer',
@@ -388,9 +388,10 @@ const AdminClients = () => {
                     }
                     secondary={
                       <Typography variant="body2" color="text.secondary">
+                        📅{' '}
                         {format(
                           new Date(appointment.date),
-                          'dd. MMMM yyyy v HH:mm',
+                          "dd. MMMM yyyy 'v' HH:mm",
                           { locale: cs },
                         )}
                       </Typography>
