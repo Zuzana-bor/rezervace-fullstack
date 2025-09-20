@@ -51,6 +51,8 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
   const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
   const [allAppointments, setAllAppointments] = useState<AnyAppointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -83,15 +85,59 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!date || !service) {
+      setError('Prosím vyplňte všechna pole');
+      return;
+    }
+
+    // Kontrola, zda je termín obsazený
+    const selectedDateTime = new Date(date);
+    const isTimeOccupied = allAppointments.some((apt: any) => {
+      const aptDate = new Date(apt.date);
+      return Math.abs(aptDate.getTime() - selectedDateTime.getTime()) < 60000; // Rozdíl menší než 1 minuta
+    });
+
+    if (isTimeOccupied) {
+      setError('Tento termín je již obsazený. Prosím vyberte jiný čas.');
+      return;
+    }
+
+    // Kontrola blokovaných časů
+    const isTimeBlocked = blockedTimes.some((blockedTime: any) => {
+      const blockedDate = new Date(blockedTime.date);
+      return (
+        Math.abs(blockedDate.getTime() - selectedDateTime.getTime()) < 60000
+      );
+    });
+
+    if (isTimeBlocked) {
+      setError('V tomto termínu nepracujem. Prosím vyberte jiný čas.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
     try {
       await createAppointment({ date, service });
-      alert('Objednávka byla úspěšně vytvořena!');
+      alert('Rezervace byla úspěšně vytvořena!');
       setDate('');
       setService('');
       if (onCreated) onCreated();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Chyba při odesílání objednávky:', err);
-      alert('Chyba při vytváření objednávky');
+
+      // Lepší error handling
+      if (err?.response?.status === 409) {
+        setError('Tento termín je již obsazený. Prosím vyberte jiný čas.');
+      } else if (err?.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Chyba při vytváření rezervace. Zkuste to prosím znovu.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -140,6 +186,11 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
             Cena: {selectedPrice} Kč
           </Typography>
         )}
+        {error && (
+          <Typography color="error" variant="body2">
+            {error}
+          </Typography>
+        )}
         <Button
           type="submit"
           variant="contained"
@@ -152,8 +203,9 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
               backgroundColor: '#265a32',
             },
           }}
+          disabled={isSubmitting}
         >
-          Objednat se
+          {isSubmitting ? 'Probíhá rezervace...' : 'Objednat se'}
         </Button>
       </Stack>
     </form>

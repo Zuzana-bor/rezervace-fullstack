@@ -10,12 +10,44 @@ const router = express.Router();
 router.post('/me', requireAuth, async (req, res) => {
   const { date, service } = req.body;
   const userId = req.user?.id;
+
   try {
     if (!date || !service || !userId) {
-      return res
-        .status(400)
-        .json({ message: 'Chybí povinné údaje (datum, služba nebo uživatel)' });
+      return res.status(400).json({
+        message: 'Chybí povinné údaje (datum, služba nebo uživatel)',
+      });
     }
+
+    const start = new Date(date);
+
+    // Kontrola, zda už existuje rezervace ve stejný čas
+    const existingAppointment = await Appointment.findOne({
+      date: {
+        $gte: new Date(start.getTime() - 30 * 60000), // 30 minut před
+        $lt: new Date(start.getTime() + 30 * 60000), // 30 minut po
+      },
+    });
+
+    if (existingAppointment) {
+      return res.status(409).json({
+        message: 'Tento termín je již obsazený. Prosím vyberte jiný čas.',
+      });
+    }
+
+    // Kontrola blokovaných časů
+    const blockedTime = await BlockedTime.findOne({
+      date: {
+        $gte: new Date(start.getTime() - 30 * 60000),
+        $lt: new Date(start.getTime() + 30 * 60000),
+      },
+    });
+
+    if (blockedTime) {
+      return res.status(409).json({
+        message: 'V tomto termínu nepracujem. Prosím vyberte jiný čas.',
+      });
+    }
+
     // Najdi službu podle ID a získej cenu a délku
     const foundService = await Service.findById(service);
     if (!foundService) {
@@ -31,33 +63,35 @@ router.post('/me', requireAuth, async (req, res) => {
       !date.includes('-')
         ? date + '+02:00'
         : date;
-    const start = new Date(dateString);
-    const end = new Date(start.getTime() + duration * 60000);
+    const appointmentStart = new Date(dateString);
+    const appointmentEnd = new Date(
+      appointmentStart.getTime() + duration * 60000,
+    );
     // Zkontroluj kolize s existujícími rezervacemi
     const conflict = await Appointment.findOne({
       $or: [
         // Nový začátek spadá do existující rezervace
         {
-          date: { $lt: end },
+          date: { $lt: appointmentEnd },
           $expr: {
             $gt: [
               { $add: ['$date', { $multiply: ['$duration', 60000] }] },
-              start,
+              appointmentStart,
             ],
           },
         },
         // Nový konec spadá do existující rezervace
         {
-          date: { $lt: end },
+          date: { $lt: appointmentEnd },
           $expr: {
             $gt: [
               { $add: ['$date', { $multiply: ['$duration', 60000] }] },
-              start,
+              appointmentStart,
             ],
           },
         },
         // Nová rezervace zcela překrývá existující
-        { date: { $gte: start, $lt: end } },
+        { date: { $gte: appointmentStart, $lt: appointmentEnd } },
       ],
     });
     if (conflict) {
@@ -67,19 +101,24 @@ router.post('/me', requireAuth, async (req, res) => {
     const blocked = await BlockedTime.findOne({
       $or: [
         // Překryv s blokovaným intervalem
-        { start: { $lt: end }, end: { $gt: start } },
+        { start: { $lt: appointmentEnd }, end: { $gt: appointmentStart } },
         // Blokace na celý den
-        { allDay: true, start: { $lte: start }, end: { $gte: end } },
+        {
+          allDay: true,
+          start: { $lte: appointmentStart },
+          end: { $gte: appointmentEnd },
+        },
         // Blokace na celý den pro víkend
       ],
     });
     // Zablokuj všechny soboty a neděle
-    const isWeekend = start.getDay() === 0 || start.getDay() === 6;
+    const isWeekend =
+      appointmentStart.getDay() === 0 || appointmentStart.getDay() === 6;
     if (blocked || isWeekend) {
       return res.status(409).json({ message: 'Tento termín je blokovaný.' });
     }
     const appointment = new Appointment({
-      date: start,
+      date: appointmentStart,
       service: foundService.name,
       price,
       userId,
@@ -88,6 +127,7 @@ router.post('/me', requireAuth, async (req, res) => {
     const saved = await appointment.save();
     res.status(201).json(saved);
   } catch (err) {
+    console.error('Chyba při vytváření rezervace:', err);
     res.status(500).json({
       message: 'Chyba při vytváření rezervace',
       error: err instanceof Error ? err.message : String(err),
