@@ -31,11 +31,17 @@ const AdminCalendar = ({
       setRawEvents(r);
       setEvents(
         r.map((a: any) => ({
-          id: a._id, // FullCalendar potřebuje id
-          title: `${a.service} – ${a.userId?.name || ''}`,
+          id: a._id,
+          title: `${a.service} – ${
+            a.userId
+              ? `${a.userId.firstName} ${a.userId.lastName}`
+              : a.clientFirstName && a.clientLastName
+              ? `${a.clientFirstName} ${a.clientLastName}`
+              : 'Neznámý klient'
+          }`,
           start: a.date,
-          _id: a._id, // přidej _id explicitně
-          ...a, // předej celé appointment pro detail/mazání
+          _id: a._id,
+          ...a,
         })),
       );
     });
