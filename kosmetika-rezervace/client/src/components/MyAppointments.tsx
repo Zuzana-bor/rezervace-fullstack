@@ -27,9 +27,11 @@ const MyAppointments = ({ appointments, error }: MyAppointmentsProps) => {
         appointments.map((app) => (
           <ListItem key={app._id}>
             <ListItemText
-              primary={`${format(new Date(app.date), 'dd. MMMM yyyy v HH:mm', {
-                locale: cs,
-              })} – ${app.service}`}
+              primary={`${format(
+                new Date(app.date),
+                "dd. MMMM yyyy 'v' HH:mm",
+                { locale: cs },
+              )} – ${app.service}`}
               secondary={`Cena: ${app.price} Kč`}
             />
           </ListItem>
