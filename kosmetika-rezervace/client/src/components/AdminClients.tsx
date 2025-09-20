@@ -245,7 +245,7 @@ const AdminClients = () => {
           <TableBody>
             {filteredUsers.map((u: any) => (
               <TableRow
-                key={u._id}
+                key={u._id} // Oprava z u.id na u._id
                 hover
                 sx={{
                   cursor: 'pointer',
