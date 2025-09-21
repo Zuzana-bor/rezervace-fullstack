@@ -97,14 +97,14 @@ const AdminClients = () => {
     user: user,
   }));
 
-  // Otevření detailu klientky - opraven endpoint
+  // Otevření detailu klientky - změna endpointu
   const handleClientClick = async (client: any) => {
     console.log('🔍 Vybraná klientka:', client);
     setSelectedClient(client);
     setShowClientDetail(true);
     try {
-      // Použije nový admin endpoint pro všechny rezervace
-      const response = await fetch('/api/appointments/all', {
+      // ZMĚNA: použije admin endpoint místo appointments/all
+      const response = await fetch('/api/admin/appointments', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
@@ -147,10 +147,10 @@ const AdminClients = () => {
     setEditingAppointment(null);
   };
 
-  // Pomocná funkce pro načtení klientských rezervací - také opravit
+  // Pomocná funkce - také změnit endpoint
   const loadClientAppointments = async (clientId: string) => {
     try {
-      const response = await fetch('/api/appointments/all', {
+      const response = await fetch('/api/admin/appointments', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',

@@ -6,35 +6,15 @@ import { BlockedTime } from '../models/BlockedTime';
 
 const router = express.Router();
 
-// ADMIN endpoint musí být PŘED obecným endpoint "/"
-router.get('/all', requireAuth, async (req, res) => {
-  try {
-    // Kontrola, zda je uživatel admin
-    if (req.user?.role !== 'admin') {
-      return res.status(403).json({ message: 'Přístup odepřen' });
-    }
-
-    const appointments = await Appointment.find()
-      .populate('userId', 'firstName lastName email phone') // Načte i údaje o uživateli
-      .sort({ date: 1 });
-
-    console.log('📋 Admin požádal o všechny rezervace:', appointments.length);
-    res.json(appointments);
-  } catch (err) {
-    console.error('Chyba při načítání všech rezervací:', err);
-    res.status(500).json({
-      message: 'Chyba při načítání rezervací',
-      error: err instanceof Error ? err.message : String(err),
-    });
-  }
-});
-
 // Endpoint pro získání všech rezervací (pro blokování termínů ve formuláři)
 router.get('/', requireAuth, async (req, res) => {
   try {
+    console.log('🔍 Endpoint / volaný');
     const appointments = await Appointment.find();
+    console.log('📋 Nalezeno rezervací:', appointments.length);
     res.status(200).json(appointments);
   } catch (err) {
+    console.error('Chyba při načítání rezervací:', err);
     res.status(500).json({ message: 'Chyba při načítání všech rezervací' });
   }
 });
@@ -42,13 +22,51 @@ router.get('/', requireAuth, async (req, res) => {
 router.get('/me', requireAuth, async (req, res) => {
   const userId = req.user?.id;
   try {
+    console.log('🔍 Endpoint /me volaný pro userId:', userId);
     const appointments = await Appointment.find({ userId }).populate(
       'userId',
       'firstName lastName email',
     );
+    console.log('📋 Nalezeno rezervací pro uživatele:', appointments.length);
     res.status(200).json(appointments);
   } catch (err) {
+    console.error('Chyba při načítání rezervací:', err);
     res.status(500).json({ message: 'Chyba při načítání rezervací' });
+  }
+});
+
+// CHYBĚJÍCÍ DELETE endpoint
+router.delete('/:id', requireAuth, async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    console.log('🗑️ Mazání rezervace:', appointmentId, 'user role:', userRole);
+
+    // Najdi rezervaci
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: 'Rezervace nenalezena' });
+    }
+
+    // Kontrola oprávnění - admin může mazat všechny, uživatel jen své
+    if (userRole !== 'admin' && appointment.userId?.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ message: 'Nemáte oprávnění smazat tuto rezervaci' });
+    }
+
+    await Appointment.findByIdAndDelete(appointmentId);
+    console.log('✅ Rezervace smazána:', appointmentId);
+
+    res.status(200).json({ message: 'Rezervace byla úspěšně smazána' });
+  } catch (err) {
+    console.error('❌ Chyba při mazání rezervace:', err);
+    res.status(500).json({
+      message: 'Chyba při mazání rezervace',
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 });
 
