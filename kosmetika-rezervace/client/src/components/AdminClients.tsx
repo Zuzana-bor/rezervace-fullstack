@@ -98,14 +98,14 @@ const AdminClients = () => {
     user: user,
   }));
 
-  // Otevření detailu klientky - použije getUserAppointments
+  // Otevření detailu klientky - opravené ID
   const handleClientClick = async (client: any) => {
     console.log('🔍 Vybraná klientka:', client);
     setSelectedClient(client);
     setShowClientDetail(true);
     try {
-      // Použije existující getUserAppointments s ID klientky
-      const clientAppointments = await getUserAppointments(client._id);
+      // Použije client.id místo client._id
+      const clientAppointments = await getUserAppointments(client.id);
       console.log('✅ Rezervace klientky:', clientAppointments);
       setClientAppointments(clientAppointments);
     } catch (error) {
@@ -123,7 +123,7 @@ const AdminClients = () => {
     setEditingAppointment(null);
   };
 
-  // Pomocná funkce - také použije getUserAppointments
+  // Pomocná funkce - také opravené ID
   const loadClientAppointments = async (clientId: string) => {
     try {
       const clientAppointments = await getUserAppointments(clientId);
@@ -134,13 +134,14 @@ const AdminClients = () => {
     }
   };
 
-  // Smazání rezervace
+  // Smazání rezervace - opravené ID
   const handleDeleteAppointment = async (appointmentId: string) => {
     if (window.confirm('Opravdu chcete smazat tuto rezervaci?')) {
       try {
         await deleteAppointment(appointmentId);
+        // Použije client.id místo client._id
         const updatedAppointments = await loadClientAppointments(
-          selectedClient._id,
+          selectedClient.id,
         );
         setClientAppointments(updatedAppointments);
         showToast('Rezervace byla úspěšně smazána', 'success');
@@ -160,12 +161,12 @@ const AdminClients = () => {
     setShowNewAppointment(false);
   };
 
-  // Po vytvoření nové rezervace
+  // Po vytvoření nové rezervace - opravené ID
   const handleAppointmentCreated = async () => {
     setShowNewAppointment(false);
     if (selectedClient) {
       const updatedAppointments = await loadClientAppointments(
-        selectedClient._id,
+        selectedClient.id,
       );
       setClientAppointments(updatedAppointments);
     }
@@ -251,7 +252,7 @@ const AdminClients = () => {
           <TableBody>
             {filteredUsers.map((u: any) => (
               <TableRow
-                key={u._id} // Oprava z u.id na u._id
+                key={u.id} // Také změnit na u.id
                 hover
                 sx={{
                   cursor: 'pointer',
