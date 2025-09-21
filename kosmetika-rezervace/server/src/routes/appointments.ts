@@ -158,4 +158,26 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
+// Nový admin endpoint pro načítání všech rezervací
+router.get('/all', requireAuth, async (req, res) => {
+  try {
+    // Kontrola, zda je uživatel admin
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Přístup odepřen' });
+    }
+
+    const appointments = await Appointment.find()
+      .populate('userId', 'firstName lastName email phone') // Načte i údaje o uživateli
+      .sort({ date: 1 });
+
+    res.json(appointments);
+  } catch (err) {
+    console.error('Chyba při načítání všech rezervací:', err);
+    res.status(500).json({
+      message: 'Chyba při načítání rezervací',
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+});
+
 export default router;
