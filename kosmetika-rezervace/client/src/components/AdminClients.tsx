@@ -97,25 +97,14 @@ const AdminClients = () => {
     user: user,
   }));
 
-  // Otevření detailu klientky - použije upravený endpoint
+  // Otevření detailu klientky - použije existující API funkci
   const handleClientClick = async (client: any) => {
     console.log('🔍 Vybraná klientka:', client);
     setSelectedClient(client);
     setShowClientDetail(true);
     try {
-      // Použije upravený základní endpoint
-      const response = await fetch('/api/appointments', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Chyba při načítání rezervací');
-      }
-
-      const allAppointments = await response.json();
+      // Použije existující getMyAppointments funkci
+      const allAppointments = await getMyAppointments();
       console.log('📋 Všechny rezervace:', allAppointments);
 
       // Filtrování rezervací pro danou klientku
@@ -147,17 +136,10 @@ const AdminClients = () => {
     setEditingAppointment(null);
   };
 
-  // Pomocná funkce - také změnit endpoint
+  // Pomocná funkce - také použije API funkci
   const loadClientAppointments = async (clientId: string) => {
     try {
-      const response = await fetch('/api/appointments', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const allAppointments = await response.json();
+      const allAppointments = await getMyAppointments();
       return allAppointments.filter((apt: any) => {
         const userIdMatch =
           apt.userId?._id === clientId ||
