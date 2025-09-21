@@ -170,6 +170,7 @@ router.get('/all', requireAuth, async (req, res) => {
       .populate('userId', 'firstName lastName email phone') // Načte i údaje o uživateli
       .sort({ date: 1 });
 
+    console.log('📋 Admin požádal o všechny rezervace:', appointments.length);
     res.json(appointments);
   } catch (err) {
     console.error('Chyba při načítání všech rezervací:', err);
