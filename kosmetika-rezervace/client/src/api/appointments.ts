@@ -16,7 +16,8 @@ export const getMyAppointments = async (): Promise<Appointment[]> => {
 export const getUserAppointments = async (
   userId: string,
 ): Promise<Appointment[]> => {
-  const res = await axiosInstance.get(`/admin/appointments/user/${userId}`);
+  // Použije /me endpoint s query parametrem userId
+  const res = await axiosInstance.get(`/appointments/me?userId=${userId}`);
   return Array.isArray(res.data) ? res.data : res.data.appointments;
 };
 

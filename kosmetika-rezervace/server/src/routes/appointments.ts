@@ -34,15 +34,28 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
+// Upravit stávající endpoint aby podporoval admin dotazy
 router.get('/me', requireAuth, async (req, res) => {
-  const userId = req.user?.id;
   try {
-    console.log('🔍 Endpoint /me volaný pro userId:', userId);
-    const appointments = await Appointment.find({ userId }).populate(
-      'userId',
-      'firstName lastName email',
-    );
-    console.log('📋 Nalezeno rezervací pro uživatele:', appointments.length);
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    const targetUserId = req.query.userId as string; // Admin může specifikovat userId
+
+    let queryUserId = userId; // Default: vlastní rezervace
+
+    // Pokud je admin a specifikuje userId, načte rezervace toho uživatele
+    if (userRole === 'admin' && targetUserId) {
+      queryUserId = targetUserId;
+      console.log('🔍 Admin načítá rezervace pro userId:', targetUserId);
+    } else {
+      console.log('👤 Uživatel načítá své rezervace:', userId);
+    }
+
+    const appointments = await Appointment.find({ userId: queryUserId })
+      .populate('userId', 'firstName lastName email phone')
+      .sort({ date: 1 });
+
+    console.log('📋 Nalezeno rezervací:', appointments.length);
     res.status(200).json(appointments);
   } catch (err) {
     console.error('Chyba při načítání rezervací:', err);
