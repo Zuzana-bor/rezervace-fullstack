@@ -38,6 +38,7 @@ import { getUsers } from '../api/users';
 import {
   getMyAppointments,
   deleteAppointment,
+  getUserAppointments, // Změna importu
   type Appointment,
 } from '../api/appointments';
 import { useToast } from '../context/ToastContext';
@@ -97,28 +98,14 @@ const AdminClients = () => {
     user: user,
   }));
 
-  // Otevření detailu klientky - použije existující API funkci
+  // Otevření detailu klientky - použije getUserAppointments
   const handleClientClick = async (client: any) => {
     console.log('🔍 Vybraná klientka:', client);
     setSelectedClient(client);
     setShowClientDetail(true);
     try {
-      // Použije existující getMyAppointments funkci
-      const allAppointments = await getMyAppointments();
-      console.log('📋 Všechny rezervace:', allAppointments);
-
-      // Filtrování rezervací pro danou klientku
-      const clientAppointments = allAppointments.filter((apt: any) => {
-        console.log('🔍 Porovnávám:', apt.userId, 'vs', client._id);
-
-        const userIdMatch =
-          apt.userId?._id === client._id ||
-          apt.userId === client._id ||
-          apt.userId?.toString() === client._id.toString();
-
-        return userIdMatch;
-      });
-
+      // Použije existující getUserAppointments s ID klientky
+      const clientAppointments = await getUserAppointments(client._id);
       console.log('✅ Rezervace klientky:', clientAppointments);
       setClientAppointments(clientAppointments);
     } catch (error) {
@@ -136,18 +123,11 @@ const AdminClients = () => {
     setEditingAppointment(null);
   };
 
-  // Pomocná funkce - také použije API funkci
+  // Pomocná funkce - také použije getUserAppointments
   const loadClientAppointments = async (clientId: string) => {
     try {
-      const allAppointments = await getMyAppointments();
-      return allAppointments.filter((apt: any) => {
-        const userIdMatch =
-          apt.userId?._id === clientId ||
-          apt.userId === clientId ||
-          apt.userId?.toString() === clientId.toString();
-
-        return userIdMatch;
-      });
+      const clientAppointments = await getUserAppointments(clientId);
+      return clientAppointments;
     } catch (error) {
       console.error('Chyba při načítání rezervací:', error);
       return [];

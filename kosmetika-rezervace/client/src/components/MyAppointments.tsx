@@ -1,5 +1,3 @@
-import { getMyAppointments } from '../api/appointments';
-import { useEffect, useState } from 'react';
 import { List, ListItem, ListItemText } from '@mui/material';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
