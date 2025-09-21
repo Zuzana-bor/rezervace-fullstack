@@ -96,17 +96,30 @@ const AdminClients = () => {
 
   // Otevření detailu klientky
   const handleClientClick = async (client: any) => {
+    console.log('🔍 Vybraná klientka:', client); // Debug
     setSelectedClient(client);
     setShowClientDetail(true);
     try {
       const allAppointments = await getAllAppointments();
-      // Filtrujeme rezervace pro danou klientku
-      const clientAppointments = allAppointments.filter(
-        (apt: any) =>
-          apt.userId?._id === client._id || apt.userId === client._id,
-      );
+      console.log('📋 Všechny rezervace:', allAppointments); // Debug
+
+      // Opravené filtrování rezervací pro danou klientku
+      const clientAppointments = allAppointments.filter((apt: any) => {
+        console.log('🔍 Porovnávám:', apt.userId, 'vs', client._id); // Debug
+
+        // Kontrola různých formátů userId
+        const userIdMatch =
+          apt.userId?._id === client._id || // Pokud je userId objekt s _id
+          apt.userId === client._id || // Pokud je userId přímo string
+          apt.userId?.toString() === client._id.toString(); // String porovnání
+
+        return userIdMatch;
+      });
+
+      console.log('✅ Rezervace klientky:', clientAppointments); // Debug
       setClientAppointments(clientAppointments);
     } catch (error) {
+      console.error('❌ Chyba při načítání rezervací:', error);
       showToast('Chyba při načítání rezervací klientky', 'error');
       setClientAppointments([]);
     }
@@ -120,12 +133,17 @@ const AdminClients = () => {
     setEditingAppointment(null);
   };
 
-  // Pomocná funkce pro načtení klientských rezervací
+  // Pomocná funkce pro načtení klientských rezervací (také opravit)
   const loadClientAppointments = async (clientId: string) => {
     const allAppointments = await getAllAppointments();
-    return allAppointments.filter(
-      (apt: any) => apt.userId?._id === clientId || apt.userId === clientId,
-    );
+    return allAppointments.filter((apt: any) => {
+      const userIdMatch =
+        apt.userId?._id === clientId ||
+        apt.userId === clientId ||
+        apt.userId?.toString() === clientId.toString();
+
+      return userIdMatch;
+    });
   };
 
   // Smazání rezervace
