@@ -35,8 +35,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import PhoneIcon from '@mui/icons-material/Phone';
 import { getUsers } from '../api/users';
-import { getAllAppointments, Appointment } from '../api/appointmentsAll';
-import { deleteAppointment } from '../api/appointments';
+import {
+  getMyAppointments,
+  deleteAppointment,
+  type Appointment,
+} from '../api/appointments';
 import { useToast } from '../context/ToastContext';
 import AdminNewAppointment from './AdminNewAppointment';
 import { format } from 'date-fns';
@@ -96,27 +99,38 @@ const AdminClients = () => {
 
   // Otevření detailu klientky
   const handleClientClick = async (client: any) => {
-    console.log('🔍 Vybraná klientka:', client); // Debug
+    console.log('🔍 Vybraná klientka:', client);
     setSelectedClient(client);
     setShowClientDetail(true);
     try {
-      const allAppointments = await getAllAppointments();
-      console.log('📋 Všechny rezervace:', allAppointments); // Debug
+      // Změňte na existující API endpoint
+      const response = await fetch('/api/appointments', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-      // Opravené filtrování rezervací pro danou klientku
+      if (!response.ok) {
+        throw new Error('Chyba při načítání rezervací');
+      }
+
+      const allAppointments = await response.json();
+      console.log('📋 Všechny rezervace:', allAppointments);
+
+      // Filtrování rezervací pro danou klientku
       const clientAppointments = allAppointments.filter((apt: any) => {
-        console.log('🔍 Porovnávám:', apt.userId, 'vs', client._id); // Debug
+        console.log('🔍 Porovnávám:', apt.userId, 'vs', client._id);
 
-        // Kontrola různých formátů userId
         const userIdMatch =
-          apt.userId?._id === client._id || // Pokud je userId objekt s _id
-          apt.userId === client._id || // Pokud je userId přímo string
-          apt.userId?.toString() === client._id.toString(); // String porovnání
+          apt.userId?._id === client._id ||
+          apt.userId === client._id ||
+          apt.userId?.toString() === client._id.toString();
 
         return userIdMatch;
       });
 
-      console.log('✅ Rezervace klientky:', clientAppointments); // Debug
+      console.log('✅ Rezervace klientky:', clientAppointments);
       setClientAppointments(clientAppointments);
     } catch (error) {
       console.error('❌ Chyba při načítání rezervací:', error);
@@ -135,15 +149,27 @@ const AdminClients = () => {
 
   // Pomocná funkce pro načtení klientských rezervací (také opravit)
   const loadClientAppointments = async (clientId: string) => {
-    const allAppointments = await getAllAppointments();
-    return allAppointments.filter((apt: any) => {
-      const userIdMatch =
-        apt.userId?._id === clientId ||
-        apt.userId === clientId ||
-        apt.userId?.toString() === clientId.toString();
+    try {
+      const response = await fetch('/api/appointments', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-      return userIdMatch;
-    });
+      const allAppointments = await response.json();
+      return allAppointments.filter((apt: any) => {
+        const userIdMatch =
+          apt.userId?._id === clientId ||
+          apt.userId === clientId ||
+          apt.userId?.toString() === clientId.toString();
+
+        return userIdMatch;
+      });
+    } catch (error) {
+      console.error('Chyba při načítání rezervací:', error);
+      return [];
+    }
   };
 
   // Smazání rezervace
