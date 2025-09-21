@@ -6,6 +6,52 @@ import { BlockedTime } from '../models/BlockedTime';
 
 const router = express.Router();
 
+// ADMIN endpoint musí být PŘED obecným endpoint "/"
+router.get('/all', requireAuth, async (req, res) => {
+  try {
+    // Kontrola, zda je uživatel admin
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Přístup odepřen' });
+    }
+
+    const appointments = await Appointment.find()
+      .populate('userId', 'firstName lastName email phone') // Načte i údaje o uživateli
+      .sort({ date: 1 });
+
+    console.log('📋 Admin požádal o všechny rezervace:', appointments.length);
+    res.json(appointments);
+  } catch (err) {
+    console.error('Chyba při načítání všech rezervací:', err);
+    res.status(500).json({
+      message: 'Chyba při načítání rezervací',
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+});
+
+// Endpoint pro získání všech rezervací (pro blokování termínů ve formuláři)
+router.get('/', requireAuth, async (req, res) => {
+  try {
+    const appointments = await Appointment.find();
+    res.status(200).json(appointments);
+  } catch (err) {
+    res.status(500).json({ message: 'Chyba při načítání všech rezervací' });
+  }
+});
+
+router.get('/me', requireAuth, async (req, res) => {
+  const userId = req.user?.id;
+  try {
+    const appointments = await Appointment.find({ userId }).populate(
+      'userId',
+      'firstName lastName email',
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    res.status(500).json({ message: 'Chyba při načítání rezervací' });
+  }
+});
+
 // Vytvoření nové rezervace s blokací podle délky služby
 router.post('/me', requireAuth, async (req, res) => {
   const { date, service } = req.body;
@@ -130,52 +176,6 @@ router.post('/me', requireAuth, async (req, res) => {
     console.error('Chyba při vytváření rezervace:', err);
     res.status(500).json({
       message: 'Chyba při vytváření rezervace',
-      error: err instanceof Error ? err.message : String(err),
-    });
-  }
-});
-
-router.get('/me', requireAuth, async (req, res) => {
-  const userId = req.user?.id;
-  try {
-    const appointments = await Appointment.find({ userId }).populate(
-      'userId',
-      'firstName lastName email',
-    );
-    res.status(200).json(appointments);
-  } catch (err) {
-    res.status(500).json({ message: 'Chyba při načítání rezervací' });
-  }
-});
-
-// Endpoint pro získání všech rezervací (pro blokování termínů ve formuláři)
-router.get('/', requireAuth, async (req, res) => {
-  try {
-    const appointments = await Appointment.find();
-    res.status(200).json(appointments);
-  } catch (err) {
-    res.status(500).json({ message: 'Chyba při načítání všech rezervací' });
-  }
-});
-
-// Nový admin endpoint pro načítání všech rezervací
-router.get('/all', requireAuth, async (req, res) => {
-  try {
-    // Kontrola, zda je uživatel admin
-    if (req.user?.role !== 'admin') {
-      return res.status(403).json({ message: 'Přístup odepřen' });
-    }
-
-    const appointments = await Appointment.find()
-      .populate('userId', 'firstName lastName email phone') // Načte i údaje o uživateli
-      .sort({ date: 1 });
-
-    console.log('📋 Admin požádal o všechny rezervace:', appointments.length);
-    res.json(appointments);
-  } catch (err) {
-    console.error('Chyba při načítání všech rezervací:', err);
-    res.status(500).json({
-      message: 'Chyba při načítání rezervací',
       error: err instanceof Error ? err.message : String(err),
     });
   }
