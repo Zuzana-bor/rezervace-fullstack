@@ -6,16 +6,31 @@ import { BlockedTime } from '../models/BlockedTime';
 
 const router = express.Router();
 
-// Endpoint pro získání všech rezervací (pro blokování termínů ve formuláři)
+// Endpoint pro získání všech rezervací - upraven pro admin
 router.get('/', requireAuth, async (req, res) => {
   try {
-    console.log('🔍 Endpoint / volaný');
-    const appointments = await Appointment.find();
-    console.log('📋 Nalezeno rezervací:', appointments.length);
+    console.log('🔍 Endpoint / volaný, user role:', req.user?.role);
+
+    let appointments;
+
+    if (req.user?.role === 'admin') {
+      // Admin vidí všechny rezervace s populovanými údaji
+      appointments = await Appointment.find()
+        .populate('userId', 'firstName lastName email phone')
+        .sort({ date: 1 });
+      console.log('📋 Admin - nalezeno všech rezervací:', appointments.length);
+    } else {
+      // Uživatel vidí jen své rezervace
+      appointments = await Appointment.find({ userId: req.user?.id })
+        .populate('userId', 'firstName lastName email')
+        .sort({ date: 1 });
+      console.log('📋 User - nalezeno rezervací:', appointments.length);
+    }
+
     res.status(200).json(appointments);
   } catch (err) {
     console.error('Chyba při načítání rezervací:', err);
-    res.status(500).json({ message: 'Chyba při načítání všech rezervací' });
+    res.status(500).json({ message: 'Chyba při načítání rezervací' });
   }
 });
 
