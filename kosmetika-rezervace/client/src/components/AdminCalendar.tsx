@@ -137,7 +137,6 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
-            timeZone="local" // Použije lokální timezone jako date-fns
             firstDay={1}
             headerToolbar={{
               left: 'prev,next today',
