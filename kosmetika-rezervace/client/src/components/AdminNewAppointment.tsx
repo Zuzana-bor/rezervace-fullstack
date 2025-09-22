@@ -147,13 +147,16 @@ const AdminNewAppointment = ({
         alert('Vybraná služba nebyla nalezena.');
         return;
       }
+
+      // JEDNODUŠE pošlete datum jak je (stejně jako NewAppointment)
       await createAppointmentAdmin({
-        date,
+        date, // Bez jakýchkoli úprav!
         service: foundService.name,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         clientPhone: clientPhone.trim(),
       });
+
       alert('Objednávka byla úspěšně vytvořena!');
       setDate('');
       setService('');
