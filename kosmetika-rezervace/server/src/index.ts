@@ -176,7 +176,7 @@ try {
           hour: '2-digit',
           minute: '2-digit',
         });
-        const text = `Dobrý den,připomínám termín ${serviceName} zítra v ${time} Termin potvrdte SMS zpravou ve tvaru OK na tel.:736258632. Pokud Vam termin nevyhovuje, ozvete se. Těším se na vás, Petra.`;
+        const text = `Dobrý den, připomínám termín ${serviceName} zítra v ${time}. Termin potvrdte SMS zpravou ve tvaru OK na tel.:736258632. Pokud Vam termin nevyhovuje, ozvete se. Těším se na vás, Petra.`;
 
         try {
           await axios.post(
