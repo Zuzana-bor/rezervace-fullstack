@@ -121,9 +121,14 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
 
     try {
       // Ensure date is sent with Czech timezone (+02:00) for consistent handling
-      const dateWithTimezone = date.includes('+') || date.includes('Z') || date.includes('-') 
-        ? date 
-        : date + '+02:00';
+      // Check for timezone info after the time part (after 'T')
+      const timePartIndex = date.indexOf('T');
+      const hasTimezone = timePartIndex !== -1 && (
+        date.slice(timePartIndex).includes('+') || 
+        date.slice(timePartIndex).includes('Z') || 
+        date.slice(timePartIndex).includes('-')
+      );
+      const dateWithTimezone = hasTimezone ? date : date + '+02:00';
       
       await createAppointment({ date: dateWithTimezone, service });
       alert('Rezervace byla úspěšně vytvořena!');

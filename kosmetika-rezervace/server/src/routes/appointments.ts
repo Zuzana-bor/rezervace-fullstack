@@ -149,13 +149,14 @@ router.post('/me', requireAuth, async (req, res) => {
     const duration = foundService.duration;
     // Only add Czech timezone offset (+02:00) if no timezone is specified
     // This prevents double-adding when frontend already includes timezone
-    const dateString =
-      date.includes('T') &&
-      !date.includes('Z') &&
-      !date.includes('+') &&
-      !date.includes('-')
-        ? date + '+02:00'
-        : date;
+    // Check for timezone info only after the time part (after 'T')
+    const timePartIndex = date.indexOf('T');
+    const hasTimezone = timePartIndex !== -1 && (
+      date.slice(timePartIndex).includes('+') || 
+      date.slice(timePartIndex).includes('Z') || 
+      date.slice(timePartIndex).includes('-')
+    );
+    const dateString = hasTimezone ? date : date + '+02:00';
     const appointmentStart = new Date(dateString);
     const appointmentEnd = new Date(
       appointmentStart.getTime() + duration * 60000,

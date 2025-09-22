@@ -56,13 +56,14 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
     const duration = foundService.duration;
     // Only add Czech timezone offset (+02:00) if no timezone is specified
     // This prevents double-adding when frontend already includes timezone
-    const dateString =
-      date.includes('T') &&
-      !date.includes('Z') &&
-      !date.includes('+') &&
-      !date.includes('-')
-        ? date + '+02:00'
-        : date;
+    // Check for timezone info only after the time part (after 'T')
+    const timePartIndex = date.indexOf('T');
+    const hasTimezone = timePartIndex !== -1 && (
+      date.slice(timePartIndex).includes('+') || 
+      date.slice(timePartIndex).includes('Z') || 
+      date.slice(timePartIndex).includes('-')
+    );
+    const dateString = hasTimezone ? date : date + '+02:00';
     const start = new Date(dateString);
     // Vytvoř rezervaci bez userId, ale s jménem, příjmením a telefonem klientky
     const appointment = new Appointment({
@@ -106,14 +107,16 @@ router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
       duration: foundService.duration,
       // Only add Czech timezone offset (+02:00) if no timezone is specified
       // This prevents double-adding when frontend already includes timezone
-      date: new Date(
-        date.includes('T') &&
-        !date.includes('Z') &&
-        !date.includes('+') &&
-        !date.includes('-')
-          ? date + '+02:00'
-          : date,
-      ),
+      // Check for timezone info only after the time part (after 'T')
+      date: new Date((() => {
+        const timePartIndex = date.indexOf('T');
+        const hasTimezone = timePartIndex !== -1 && (
+          date.slice(timePartIndex).includes('+') || 
+          date.slice(timePartIndex).includes('Z') || 
+          date.slice(timePartIndex).includes('-')
+        );
+        return hasTimezone ? date : date + '+02:00';
+      })()),
     };
     const updated = await Appointment.findByIdAndUpdate(req.params.id, update, {
       new: true,
