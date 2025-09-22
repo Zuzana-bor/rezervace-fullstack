@@ -147,8 +147,13 @@ const AdminNewAppointment = ({
         alert('Vybraná služba nebyla nalezena.');
         return;
       }
+      // Ensure date is sent with Czech timezone (+02:00) for consistent handling
+      const dateWithTimezone = date.includes('+') || date.includes('Z') || date.includes('-') 
+        ? date 
+        : date + '+02:00';
+        
       await createAppointmentAdmin({
-        date,
+        date: dateWithTimezone,
         service: foundService.name,
         firstName: firstName.trim(),
         lastName: lastName.trim(),

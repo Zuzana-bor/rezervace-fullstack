@@ -56,6 +56,7 @@ const AdminCalendar = ({
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         firstDay={1}
+        timeZone="Europe/Prague"
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',

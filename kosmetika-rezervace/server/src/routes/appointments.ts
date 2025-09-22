@@ -147,7 +147,8 @@ router.post('/me', requireAuth, async (req, res) => {
     }
     const price = foundService.price;
     const duration = foundService.duration;
-    // Přidej timezone offset pro český čas, pokud není specifikován
+    // Only add Czech timezone offset (+02:00) if no timezone is specified
+    // This prevents double-adding when frontend already includes timezone
     const dateString =
       date.includes('T') &&
       !date.includes('Z') &&

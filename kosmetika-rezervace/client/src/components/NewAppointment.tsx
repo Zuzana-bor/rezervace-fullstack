@@ -120,7 +120,12 @@ const NewAppointment = ({ onCreated }: NewAppointmentProps) => {
     setError(null);
 
     try {
-      await createAppointment({ date, service });
+      // Ensure date is sent with Czech timezone (+02:00) for consistent handling
+      const dateWithTimezone = date.includes('+') || date.includes('Z') || date.includes('-') 
+        ? date 
+        : date + '+02:00';
+      
+      await createAppointment({ date: dateWithTimezone, service });
       alert('Rezervace byla úspěšně vytvořena!');
       setDate('');
       setService('');
