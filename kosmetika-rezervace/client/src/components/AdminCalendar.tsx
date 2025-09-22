@@ -70,8 +70,8 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                 ? `${a.clientFirstName} ${a.clientLastName}`
                 : 'Neznámý klient'
             }`,
-            // Používá lokální timezone jako MyAppointments
-            start: appointmentDate,
+            // ZMĚNA: Použijte původní ISO string místo Date objektu
+            start: a.date, // Přesně to co vrací backend
             _id: a._id,
             ...a,
           };
@@ -104,7 +104,6 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
         setRawEvents(updatedAppointments);
         setEvents(
           updatedAppointments.map((a: any) => {
-            const appointmentDate = new Date(a.date);
             return {
               id: a._id,
               title: `${a.service} – ${
@@ -114,7 +113,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                   ? `${a.clientFirstName} ${a.clientLastName}`
                   : 'Neznámý klient'
               }`,
-              start: appointmentDate,
+              start: a.date, // ZMĚNA: Přesně to co vrací backend
               _id: a._id,
               ...a,
             };
@@ -257,7 +256,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                             ? `${a.clientFirstName} ${a.clientLastName}`
                             : 'Neznámý klient'
                         }`,
-                        start: appointmentDate,
+                        start: a.date, // ZMĚNA: Přesně to co vrací backend
                         _id: a._id,
                         ...a,
                       };
