@@ -136,6 +136,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
+            timeZone="UTC" // PŘIDEJTE TOTO!
             firstDay={1}
             headerToolbar={{
               left: 'prev,next today',
