@@ -4,8 +4,8 @@ import { getServices, Service } from '../api/services';
 import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
 import {
   getAllAppointments,
-  Appointment as AnyAppointment,
-} from '../api/appointmentsAll';
+  AdminAppointment as AnyAppointment,
+} from '../api/adminAppointments';
 import { createAppointmentAdmin } from '../api/appointments';
 import { useAuth } from '../context/AuthContext';
 

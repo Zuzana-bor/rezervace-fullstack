@@ -15,7 +15,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useState, useEffect } from 'react';
-import { getAllAppointments } from '../api/appointmentsAll';
+import { getAllAppointments } from '../api/adminAppointments';
 import { deleteAppointment } from '../api/appointments';
 import { formatCzechTime, formatForCalendar } from '../utils/timezone';
 import AdminNewAppointment from './AdminNewAppointment';

@@ -6,7 +6,7 @@ import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
 import {
   getAllAppointments,
   Appointment as AnyAppointment,
-} from '../api/appointmentsAll';
+} from '../api/adminAppointments';
 import { createAppointment } from '../api/appointments';
 
 interface NewAppointmentProps {
