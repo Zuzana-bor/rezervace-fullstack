@@ -17,6 +17,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { useState, useEffect } from 'react';
 import { getAllAppointments } from '../api/appointmentsAll';
 import { deleteAppointment } from '../api/appointments';
+import { formatCzechTime, formatForCalendar } from '../utils/timezone';
 import AdminNewAppointment from './AdminNewAppointment';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
@@ -36,29 +37,15 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
   useEffect(() => {
     getAllAppointments().then((r) => {
       console.log('📅 DEBUGGING - Raw appointments from backend:', r);
-      if (r.length > 0) {
-        console.log('📅 DEBUGGING - First appointment raw date:', r[0].date);
-        console.log(
-          '📅 DEBUGGING - First appointment as Date:',
-          new Date(r[0].date),
-        );
-        console.log(
-          '📅 DEBUGGING - Hours should be:',
-          new Date(r[0].date).getHours(),
-        );
-      }
 
       setRawEvents(r);
       setEvents(
         r.map((a: any) => {
-          // STEJNÁ LOGIKA jako v MyAppointments - používáme date-fns
           const appointmentDate = new Date(a.date);
           console.log(
-            `📅 DEBUGGING - ${a.service} raw: ${a.date}, formatted: ${format(
-              appointmentDate,
-              'dd.MM.yyyy HH:mm',
-              { locale: cs },
-            )}`,
+            `📅 CZECH TIME - ${a.service} raw: ${
+              a.date
+            }, formatted: ${formatCzechTime(a.date, 'dd.MM.yyyy HH:mm')}`,
           );
 
           return {
@@ -70,8 +57,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                 ? `${a.clientFirstName} ${a.clientLastName}`
                 : 'Neznámý klient'
             }`,
-            // ZMĚNA: Použijte původní ISO string místo Date objektu
-            start: a.date, // Přesně to co vrací backend
+            start: formatForCalendar(a.date), // ✅ Czech timezone
             _id: a._id,
             ...a,
           };
@@ -92,35 +78,40 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
     setShowEventDetail(true);
   };
 
+  // NAHRAĎTE handleDeleteAppointment:
   const handleDeleteAppointment = async () => {
     if (!selectedEvent) return;
 
     if (window.confirm('Opravdu chcete smazat tuto rezervaci?')) {
       try {
-        await deleteAppointment(selectedEvent._id);
+        console.log('🗑️ Admin mazání rezervace:', selectedEvent._id);
+        await deleteAppointment(selectedEvent._id); // ✅ Admin endpoint
         setShowEventDetail(false);
-        // Refresh dat po smazání
+
+        // ✅ Refresh s admin API
         const updatedAppointments = await getAllAppointments();
         setRawEvents(updatedAppointments);
+
+        // ✅ Použijte Czech timezone formatting
         setEvents(
-          updatedAppointments.map((a: any) => {
-            return {
-              id: a._id,
-              title: `${a.service} – ${
-                a.userId
-                  ? `${a.userId.firstName} ${a.userId.lastName}`
-                  : a.clientFirstName && a.clientLastName
-                  ? `${a.clientFirstName} ${a.clientLastName}`
-                  : 'Neznámý klient'
-              }`,
-              start: a.date, // ZMĚNA: Přesně to co vrací backend
-              _id: a._id,
-              ...a,
-            };
-          }),
+          updatedAppointments.map((a: any) => ({
+            id: a._id,
+            title: `${a.service} – ${
+              a.userId
+                ? `${a.userId.firstName} ${a.userId.lastName}`
+                : a.clientFirstName && a.clientLastName
+                ? `${a.clientFirstName} ${a.clientLastName}`
+                : 'Neznámý klient'
+            }`,
+            start: formatForCalendar(a.date), // ✅ Czech timezone
+            _id: a._id,
+            ...a,
+          })),
         );
+
+        console.log('✅ Admin rezervace smazána a kalendář aktualizován');
       } catch (error) {
-        console.error('Chyba při mazání rezervace:', error);
+        console.error('❌ Chyba při mazání rezervace:', error);
         alert('Chyba při mazání rezervace');
       }
     }
@@ -136,7 +127,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
-            timeZone="UTC" // PŘIDEJTE TOTO!
+            timeZone="Europe/Prague"
             firstDay={1}
             headerToolbar={{
               left: 'prev,next today',
@@ -184,11 +175,9 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                 </Typography>
                 <Typography>
                   <strong>Datum:</strong>{' '}
-                  {format(
-                    new Date(selectedEvent.date),
-                    "dd. MMMM yyyy 'v' HH:mm",
-                    { locale: cs },
-                  )}
+                  {selectedEvent.date
+                    ? formatCzechTime(selectedEvent.date)
+                    : 'Neplatné datum'}
                 </Typography>
                 <Typography>
                   <strong>Klient:</strong>{' '}
