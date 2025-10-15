@@ -11,7 +11,11 @@ export type AdminAppointment = {
     lastName: string;
     email: string;
   };
+  clientFirstName?: string;
+  clientLastName?: string;
   clientPhone?: string;
+  createdByAdmin?: boolean;
+  notes?: string;
 };
 
 export const getAllAppointments = async (): Promise<AdminAppointment[]> => {
@@ -44,6 +48,7 @@ export const createAppointmentAdmin = async ({
   firstName: string;
   lastName: string;
   clientPhone: string;
+  notes?: string;
 }) => {
   await axiosInstance.post('/admin/appointments', {
     date,

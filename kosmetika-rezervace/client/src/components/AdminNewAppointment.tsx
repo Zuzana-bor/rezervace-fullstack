@@ -41,6 +41,7 @@ const AdminNewAppointment = ({
   const [firstName, setFirstName] = useState(prefilledClient?.firstName || '');
   const [lastName, setLastName] = useState(prefilledClient?.lastName || '');
   const [clientPhone, setClientPhone] = useState(prefilledClient?.phone || '');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -214,6 +215,7 @@ const AdminNewAppointment = ({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         clientPhone: clientPhone.trim(),
+        notes: notes.trim() || undefined,
       });
 
       alert('Objednávka byla úspěšně vytvořena!');
@@ -222,6 +224,7 @@ const AdminNewAppointment = ({
       setFirstName('');
       setLastName('');
       setClientPhone('');
+      setNotes('');
       if (onCreated) onCreated();
     } catch (err) {
       console.error('Chyba při odesílání objednávky:', err);
@@ -298,6 +301,17 @@ const AdminNewAppointment = ({
             ))
           )}
         </TextField>
+
+        <TextField
+          label="Poznámka (volitelná)"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          multiline
+          rows={3}
+          placeholder="Speciální požadavky, alergie, poznámky k rezervaci..."
+          helperText="Např. alergie na určité produkty, speciální požadavky, připomínky"
+        />
+
         {selectedPrice !== null && (
           <Typography sx={{ color: '#2f6c3a', fontWeight: 600 }}>
             Cena: {selectedPrice} Kč

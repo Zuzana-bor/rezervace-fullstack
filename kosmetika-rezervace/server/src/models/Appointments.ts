@@ -10,6 +10,12 @@ const appointmentSchema = new mongoose.Schema({
   clientLastName: { type: String },
   clientPhone: { type: String },
   createdByAdmin: { type: Boolean, default: false },
+  notes: {
+    type: String,
+    required: false,
+    maxlength: 500, // Limit 500 znaků
+    trim: true,
+  },
 });
 
 export const Appointment = mongoose.model('Appointment', appointmentSchema);

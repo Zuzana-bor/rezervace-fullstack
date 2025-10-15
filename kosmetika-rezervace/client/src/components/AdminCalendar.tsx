@@ -199,6 +199,24 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                 <Typography>
                   <strong>Délka:</strong> {selectedEvent.duration} minut
                 </Typography>
+                {selectedEvent.notes && (
+                  <Typography sx={{ mt: 2 }}>
+                    <strong>Poznámka:</strong>
+                    <Box
+                      component="div"
+                      sx={{
+                        mt: 1,
+                        p: 2,
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: 1,
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      {selectedEvent.notes}
+                    </Box>
+                  </Typography>
+                )}
+
                 {selectedEvent.createdByAdmin && (
                   <Alert severity="info" sx={{ mt: 1 }}>
                     Rezervace vytvořena administrátorem

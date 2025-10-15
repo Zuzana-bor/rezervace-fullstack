@@ -55,7 +55,7 @@ router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
 
 // Vytvořit rezervaci pro libovolného klienta (admin)
 router.post('/', requireAuth, requireAdmin, async (req, res) => {
-  const { date, service, firstName, lastName, clientPhone } = req.body;
+  const { date, service, firstName, lastName, clientPhone, notes } = req.body;
 
   try {
     if (!date || !service || !firstName || !lastName) {
@@ -123,6 +123,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
       clientLastName: lastName,
       clientPhone,
       createdByAdmin: true,
+      notes: notes?.trim() || undefined,
     });
 
     const saved = await appointment.save();
