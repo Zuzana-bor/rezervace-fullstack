@@ -1,4 +1,3 @@
-
 export const parseCzechDate = (dateString: string): Date => {
   console.log('🇨🇿 Server parseCzechDate input:', dateString);
 
@@ -13,21 +12,15 @@ export const parseCzechDate = (dateString: string): Date => {
     return date;
   }
 
-   const [datePart, timePart] = dateString.split('T');
+  // ✅ OPRAVA: Parse bez timezone jako český lokální čas
+  const [datePart, timePart] = dateString.split('T');
   const [year, month, day] = datePart.split('-').map(Number);
   const [hour, minute] = timePart.split(':').map(Number);
 
   const date = new Date(year, month - 1, day, hour, minute, 0, 0); // Lokální čas
   console.log('🇨🇿 Server parsed as local Czech time:', date.toISOString());
   return date;
-};
-
-  // Jinak přidej český timezone offset (+01:00 zimní, +02:00 letní čas)
-
-  const czechDate = new Date(dateString + '+02:00');
-  console.log('🇨🇿 Server parsed as Czech time:', czechDate.toISOString());
-  return czechDate;
-};
+}; // ✅ OPRAVA: Ukončení funkce
 
 export const isWorkingHour = (dateString: string): boolean => {
   const date = parseCzechDate(dateString);
@@ -51,4 +44,33 @@ export const setDayEnd = (date: Date): Date => {
   const end = new Date(date);
   end.setHours(23, 59, 59, 999);
   return end;
+};
+
+// ✅ PŘIDÁNO: Dodatečné utility funkce pro validace
+export const isValidAppointmentTime = (
+  date: Date,
+): { valid: boolean; reason?: string } => {
+  console.log('🕐 Validating appointment time:', date.toISOString());
+
+  // Kontrola víkendu
+  if (isWeekend(date.toISOString())) {
+    return { valid: false, reason: 'O víkendech nepracujeme' };
+  }
+
+  // Kontrola pracovní doby
+  if (!isWorkingHour(date.toISOString())) {
+    return { valid: false, reason: 'Mimo pracovní dobu (10:00-18:00)' };
+  }
+
+  // Kontrola budoucnosti (min 2 hodiny dopředu)
+  const now = new Date();
+  const minimumTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  if (date < minimumTime) {
+    return {
+      valid: false,
+      reason: 'Rezervace musí být minimálně 2 hodiny dopředu',
+    };
+  }
+
+  return { valid: true };
 };
