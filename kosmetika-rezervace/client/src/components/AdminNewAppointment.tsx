@@ -109,7 +109,7 @@ const AdminNewAppointment = ({
 
     // timezone parsing
     const parsedDate = parseCzechInput(date)
-    const appointmentStart = parseDbTimeAsCzech(parsedDate);
+    const appointmentStart = new Date(date);
     const appointmentEnd = new Date(
       appointmentStart.getTime() + foundService.duration * 60000,
     );
@@ -131,7 +131,7 @@ const AdminNewAppointment = ({
 
     // kolize logika
     const conflict = allAppointments.find((existing) => {
-      const existingStart = parseDbTimeAsCzech(existing.date);
+      const existingStart = new Date(existing.date);
       const existingEnd = new Date(
         existingStart.getTime() + (existing.duration || 0) * 60000,
       );
@@ -206,7 +206,7 @@ const AdminNewAppointment = ({
       console.log('📤 Sending to API:', czechTimeString);
 
       await createAppointmentAdmin({
-        date: czechTimeString,
+        date,
         service: foundService.name,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
