@@ -1,4 +1,4 @@
-// server/src/utils/timezone.ts
+
 export const parseCzechDate = (dateString: string): Date => {
   console.log('🇨🇿 Server parseCzechDate input:', dateString);
 

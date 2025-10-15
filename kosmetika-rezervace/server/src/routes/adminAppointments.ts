@@ -18,6 +18,14 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
 
     console.log('📋 Admin - nalezeno rezervací:', appointments.length);
 
+    appointments.forEach((apt, index) => {
+      if (apt.notes) {
+        console.log(`📝 Rezervace ${index + 1} (${apt._id}): "${apt.notes}"`);
+      } else {
+        console.log(`📝 Rezervace ${index + 1} (${apt._id}): bez poznámky`);
+      }
+    });
+
     res.status(200).json(appointments);
   } catch (err) {
     console.error('❌ Chyba při načítání admin rezervací:', err);
