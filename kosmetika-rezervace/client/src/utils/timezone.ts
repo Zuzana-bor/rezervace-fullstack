@@ -5,6 +5,27 @@ import { cs } from 'date-fns/locale';
 /**
  * Převede ISO string z databáze na český Date objekt
  */
+// client/src/utils/timezone.ts
+export const parseDbTimeAsCzech = (dateString: string): Date => {
+  if (!dateString) throw new Error('Date string is required');
+
+  console.log('🇨🇿 parseDbTimeAsCzech input:', dateString);
+
+  // Odděl datum a čas (např. 2025-10-16T10:00:00.000Z)
+  const [datePart, timePart] = dateString.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+
+  // Odstraníme "Z" nebo offset z konce
+  const cleanTime = timePart.replace('Z', '').split('+')[0].split('-')[0];
+  const [hour, minute, second] = cleanTime.split(':').map(Number);
+
+  // Vytvoříme český lokální čas bez ohledu na UTC
+  const localDate = new Date(year, month - 1, day, hour, minute, second || 0);
+
+  console.log('🇨🇿 parseDbTimeAsCzech result:', localDate);
+  return localDate;
+};
+
 export const parseDbTime = (dateString: string): Date => {
   if (!dateString) throw new Error('Date string is required');
 
