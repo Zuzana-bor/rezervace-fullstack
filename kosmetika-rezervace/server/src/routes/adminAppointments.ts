@@ -66,13 +66,52 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
     // ✅ Použijte české timezone parsing
     const appointmentStart = parseCzechDate(date);
-    console.log('📅 Admin vytváří rezervaci:');
-    console.log('📅 Input date:', date);
-    console.log('📅 Parsed start:', appointmentStart.toISOString());
 
     const foundService = await Service.findOne({ name: service });
     if (!foundService) {
       return res.status(400).json({ message: 'Služba nenalezena' });
+    }
+    const appointmentEnd = new Date(
+      appointmentStart.getTime() + foundService.duration * 60000,
+    );
+
+    //kontrola kolizí s existujícími rezervacemi
+
+    const existingAppointment = await Appointment.findOne({
+      $or: [
+        // Nová rezervace začíná během existující
+        {
+          date: { $lte: appointmentStart },
+          $expr: {
+            $gte: [
+              { $add: ['$date', { $multiply: ['$duration', 60000] }] },
+              appointmentStart,
+            ],
+          },
+        },
+        // Nová rezervace končí během existující
+        {
+          date: { $lte: appointmentEnd },
+          $expr: {
+            $gte: [
+              { $add: ['$date', { $multiply: ['$duration', 60000] }] },
+              appointmentEnd,
+            ],
+          },
+        },
+        // Nová rezervace zcela překrývá existující
+        {
+          date: { $gte: appointmentStart, $lt: appointmentEnd },
+        },
+      ],
+    });
+
+    if (existingAppointment) {
+      console.log(
+        '❌ Kolize rezervací detekována s ID:',
+        existingAppointment._id,
+      );
+      return res.status(409).json({ message: 'Tento termín je již obsazený' });
     }
 
     const appointment = new Appointment({

@@ -21,19 +21,6 @@ export const getUserAppointments = async (
   return Array.isArray(res.data) ? res.data : res.data.appointments;
 };
 
-export const updateAppointmentAdmin = async (
-  appointmentId: string,
-  data: {
-    date: string;
-    service: string;
-    firstName?: string;
-    lastName?: string;
-    clientPhone?: string;
-  },
-): Promise<void> => {
-  await axiosInstance.put(`/admin/appointments/${appointmentId}`, data);
-};
-
 export const deleteAppointment = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/appointments/${id}`);
 };
@@ -46,26 +33,4 @@ export const createAppointment = async ({
   service: string;
 }) => {
   await axiosInstance.post('/appointments/me', { date, service });
-};
-
-export const createAppointmentAdmin = async ({
-  date,
-  service,
-  firstName,
-  lastName,
-  clientPhone,
-}: {
-  date: string;
-  service: string;
-  firstName: string;
-  lastName: string;
-  clientPhone: string;
-}) => {
-  await axiosInstance.post('/admin/appointments', {
-    date,
-    service,
-    firstName,
-    lastName,
-    clientPhone,
-  });
 };

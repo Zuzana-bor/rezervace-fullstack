@@ -5,9 +5,11 @@ import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
 import {
   getAllAppointments,
   AdminAppointment as AnyAppointment,
+  createAppointmentAdmin,
 } from '../api/adminAppointments';
-import { createAppointmentAdmin } from '../api/appointments';
+
 import { useAuth } from '../context/AuthContext';
+import { formatCzechTime, parseCzechInput } from '../utils/timezone';
 
 interface AdminNewAppointmentProps {
   onCreated: () => void;
@@ -96,18 +98,74 @@ const AdminNewAppointment = ({
 
   const isOverlapping = () => {
     if (!date || !service) return false;
+
     const foundService = services.find((s) => s._id === service);
     if (!foundService) return false;
-    const start = new Date(date);
-    const end = new Date(start.getTime() + foundService.duration * 60000);
-    return allAppointments.some((appt) => {
-      const apptStart = new Date(appt.date);
-      const apptEnd = new Date(
-        apptStart.getTime() + (appt.duration || 0) * 60000,
+
+    // timezone parsing
+    const appointmentStart = new Date(date);
+    const appointmentEnd = new Date(
+      appointmentStart.getTime() + foundService.duration * 60000,
+    );
+
+    console.log('🔍 Admin overlap check (Czech time):');
+    console.log(
+      '📅 New appointment:',
+      appointmentStart.toISOString(),
+      '-',
+      appointmentEnd.toISOString(),
+    );
+    console.log(
+      '📅 Local time:',
+      formatCzechTime(appointmentStart),
+      '-',
+      formatCzechTime(appointmentEnd),
+    );
+    console.log('📅 Duration:', foundService.duration, 'minutes');
+
+    // kolize logika
+    const conflict = allAppointments.find((existing) => {
+      const existingStart = new Date(existing.date);
+      const existingEnd = new Date(
+        existingStart.getTime() + (existing.duration || 0) * 60000,
       );
-      // Překryv: (start < apptEnd) && (end > apptStart)
-      return start < apptEnd && end > apptStart;
+
+      // Podmínka 1: Nová začíná během existující
+      const condition1 =
+        existingStart <= appointmentStart && existingEnd > appointmentStart;
+
+      // Podmínka 2: Nová končí během existující
+      const condition2 =
+        existingStart < appointmentEnd && existingEnd >= appointmentEnd;
+
+      // Podmínka 3: Existující je uvnitř nové
+      const condition3 =
+        existingStart >= appointmentStart && existingStart < appointmentEnd;
+
+      const hasConflict = condition1 || condition2 || condition3;
+
+      if (hasConflict) {
+        console.log('❌ Frontend conflict detected:');
+        console.log(
+          '📅 Existing:',
+          existingStart.toISOString(),
+          '-',
+          existingEnd.toISOString(),
+        );
+        console.log(
+          '📅 Local existing:',
+          formatCzechTime(existingStart),
+          '-',
+          formatCzechTime(existingEnd),
+        );
+        console.log('📅 Service:', existing.service);
+        console.log('📋 Conditions:', { condition1, condition2, condition3 });
+      }
+
+      return hasConflict;
     });
+
+    return !!conflict;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,10 +205,11 @@ const AdminNewAppointment = ({
         alert('Vybraná služba nebyla nalezena.');
         return;
       }
+      const czechTimeString = parseCzechInput(date);
+      console.log('📤 Sending to API:', czechTimeString);
 
-      // JEDNODUŠE pošlete datum jak je (stejně jako NewAppointment)
       await createAppointmentAdmin({
-        date, // Bez jakýchkoli úprav!
+        date: czechTimeString,
         service: foundService.name,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -166,9 +225,28 @@ const AdminNewAppointment = ({
       if (onCreated) onCreated();
     } catch (err) {
       console.error('Chyba při odesílání objednávky:', err);
-      alert(
-        'Chyba při vytváření objednávky. Zkontrolujte připojení a zadané údaje.',
-      );
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as any).response === 'object' &&
+        (err as any).response !== null
+      ) {
+        const response = (err as any).response;
+        if (response.status === 409) {
+          alert('Tento termín je již obsazený. Vyberte prosím jiný čas.');
+        } else if (response.status === 400) {
+          alert(response.data?.message || 'Neplatné údaje rezervace.');
+        } else {
+          alert(
+            'Chyba při vytváření objednávky. Zkontrolujte připojení a zadané údaje.',
+          );
+        }
+      } else {
+        alert(
+          'Chyba při vytváření objednávky. Zkontrolujte připojení a zadané údaje.',
+        );
+      }
     }
   };
 
