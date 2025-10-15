@@ -12,7 +12,6 @@ export const parseCzechDate = (dateString: string): Date => {
     return date;
   }
 
-  // ✅ OPRAVA: Parse bez timezone jako český lokální čas
   const [datePart, timePart] = dateString.split('T');
   const [year, month, day] = datePart.split('-').map(Number);
   const [hour, minute] = timePart.split(':').map(Number);
@@ -20,7 +19,7 @@ export const parseCzechDate = (dateString: string): Date => {
   const date = new Date(year, month - 1, day, hour, minute, 0, 0); // Lokální čas
   console.log('🇨🇿 Server parsed as local Czech time:', date.toISOString());
   return date;
-}; // ✅ OPRAVA: Ukončení funkce
+};
 
 export const isWorkingHour = (dateString: string): boolean => {
   const date = parseCzechDate(dateString);
@@ -46,7 +45,6 @@ export const setDayEnd = (date: Date): Date => {
   return end;
 };
 
-// ✅ PŘIDÁNO: Dodatečné utility funkce pro validace
 export const isValidAppointmentTime = (
   date: Date,
 ): { valid: boolean; reason?: string } => {

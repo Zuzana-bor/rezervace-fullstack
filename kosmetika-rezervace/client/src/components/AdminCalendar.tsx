@@ -78,7 +78,6 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
     setShowEventDetail(true);
   };
 
-  // NAHRAĎTE handleDeleteAppointment:
   const handleDeleteAppointment = async () => {
     if (!selectedEvent) return;
 
@@ -92,7 +91,6 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
         const updatedAppointments = await getAllAppointments();
         setRawEvents(updatedAppointments);
 
-        // ✅ Použijte Czech timezone formatting
         setEvents(
           updatedAppointments.map((a: any) => ({
             id: a._id,
@@ -200,21 +198,28 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                   <strong>Délka:</strong> {selectedEvent.duration} minut
                 </Typography>
                 {selectedEvent.notes && (
-                  <Typography sx={{ mt: 2 }}>
-                    <strong>Poznámka:</strong>
-                    <Box
+                  <Box sx={{ mt: 2 }}>
+                    <Typography
                       component="div"
+                      sx={{ fontWeight: 'bold', mb: 1 }}
+                    >
+                      📝 Poznámka:
+                    </Typography>
+                    <Box
                       sx={{
-                        mt: 1,
                         p: 2,
-                        backgroundColor: '#f5f5f5',
+                        backgroundColor: '#f8f9fa',
                         borderRadius: 1,
+                        border: '1px solid #e9ecef',
                         fontStyle: 'italic',
+                        color: '#495057',
                       }}
                     >
-                      {selectedEvent.notes}
+                      <Typography variant="body2">
+                        {selectedEvent.notes}
+                      </Typography>
                     </Box>
-                  </Typography>
+                  </Box>
                 )}
 
                 {selectedEvent.createdByAdmin && (

@@ -42,6 +42,7 @@ export const createAppointmentAdmin = async ({
   firstName,
   lastName,
   clientPhone,
+  notes,
 }: {
   date: string;
   service: string;
@@ -56,5 +57,6 @@ export const createAppointmentAdmin = async ({
     firstName,
     lastName,
     clientPhone,
+    notes,
   });
 };
