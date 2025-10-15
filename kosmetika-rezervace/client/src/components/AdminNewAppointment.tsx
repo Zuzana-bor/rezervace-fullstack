@@ -10,10 +10,10 @@ import {
 
 import { useAuth } from '../context/AuthContext';
 import {
+  formatCzechTime,
   parseCzechInput,
   parseDbTimeAsCzech,
-  formatCzechTime,
-} from '@/utils/timezone';
+} from '../utils/timezone';
 
 interface AdminNewAppointmentProps {
   onCreated: () => void;
@@ -108,7 +108,7 @@ const AdminNewAppointment = ({
     if (!foundService) return false;
 
     // timezone parsing
-    const parsedDate = parseCzechInput(date)
+    const parsedDate = parseCzechInput(date);
     const appointmentStart = new Date(date);
     const appointmentEnd = new Date(
       appointmentStart.getTime() + foundService.duration * 60000,
@@ -117,9 +117,9 @@ const AdminNewAppointment = ({
     console.log('🔍 Admin overlap check (Czech time):');
     console.log(
       '📅 New appointment:',
-     formatCzechTime(appointmentStart),
-    '-',
-    formatCzechTime(appointmentEnd)
+      formatCzechTime(appointmentStart),
+      '-',
+      formatCzechTime(appointmentEnd),
     );
     console.log(
       '📅 Local time:',
@@ -150,18 +150,18 @@ const AdminNewAppointment = ({
 
       const hasConflict = condition1 || condition2 || condition3;
 
-     if (hasConflict) {
-      console.log('❌ Conflict detected (Czech fixed time):');
-      console.log(
-        '📅 Existing:',
-        formatCzechTime(existingStart),
-        '-',
-        formatCzechTime(existingEnd)
-      );
-    }
+      if (hasConflict) {
+        console.log('❌ Conflict detected (Czech fixed time):');
+        console.log(
+          '📅 Existing:',
+          formatCzechTime(existingStart),
+          '-',
+          formatCzechTime(existingEnd),
+        );
+      }
 
-    return hasConflict;
-  });
+      return hasConflict;
+    });
     return !!conflict;
   };
 
@@ -206,7 +206,7 @@ const AdminNewAppointment = ({
       console.log('📤 Sending to API:', czechTimeString);
 
       await createAppointmentAdmin({
-        date:parseCzechInput(date),
+        date: parseCzechInput(date),
         service: foundService.name,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
