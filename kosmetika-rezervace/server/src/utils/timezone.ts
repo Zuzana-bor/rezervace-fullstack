@@ -13,6 +13,15 @@ export const parseCzechDate = (dateString: string): Date => {
     return date;
   }
 
+   const [datePart, timePart] = dateString.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute] = timePart.split(':').map(Number);
+
+  const date = new Date(year, month - 1, day, hour, minute, 0, 0); // Lokální čas
+  console.log('🇨🇿 Server parsed as local Czech time:', date.toISOString());
+  return date;
+};
+
   // Jinak přidej český timezone offset (+01:00 zimní, +02:00 letní čas)
 
   const czechDate = new Date(dateString + '+02:00');
