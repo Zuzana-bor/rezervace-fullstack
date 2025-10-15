@@ -9,7 +9,11 @@ import {
 } from '../api/adminAppointments';
 
 import { useAuth } from '../context/AuthContext';
-import { formatCzechTime, parseCzechInput ,parseDbTime} from '../utils/timezone';
+import {
+  parseCzechInput,
+  parseDbTimeAsCzech,
+  formatCzechTime,
+} from '@/utils/timezone';
 
 interface AdminNewAppointmentProps {
   onCreated: () => void;
@@ -105,7 +109,7 @@ const AdminNewAppointment = ({
 
     // timezone parsing
     const parsedDate = parseCzechInput(date)
-    const appointmentStart = parseDbTime(parsedDate);
+    const appointmentStart = parseDbTimeAsCzech(parsedDate);
     const appointmentEnd = new Date(
       appointmentStart.getTime() + foundService.duration * 60000,
     );
@@ -127,7 +131,7 @@ const AdminNewAppointment = ({
 
     // kolize logika
     const conflict = allAppointments.find((existing) => {
-      const existingStart = parseDbTime(existing.date);
+      const existingStart = parseDbTimeAsCzech(existing.date);
       const existingEnd = new Date(
         existingStart.getTime() + (existing.duration || 0) * 60000,
       );
@@ -146,20 +150,18 @@ const AdminNewAppointment = ({
 
       const hasConflict = condition1 || condition2 || condition3;
 
-      if (hasConflict) {
-      console.log('❌ Frontend conflict detected (Czech local time):');
+     if (hasConflict) {
+      console.log('❌ Conflict detected (Czech fixed time):');
       console.log(
         '📅 Existing:',
         formatCzechTime(existingStart),
         '-',
         formatCzechTime(existingEnd)
       );
-      console.log('📋 Conditions:', { condition1, condition2, condition3 });
     }
 
-      return hasConflict;
-    });
-
+    return hasConflict;
+  });
     return !!conflict;
   };
 
