@@ -9,7 +9,7 @@ import {
 } from '../api/adminAppointments';
 
 import { useAuth } from '../context/AuthContext';
-import { formatCzechTime, parseCzechInput } from '../utils/timezone';
+import { formatCzechTime, parseCzechInput ,parseDbTime} from '../utils/timezone';
 
 interface AdminNewAppointmentProps {
   onCreated: () => void;
@@ -104,7 +104,8 @@ const AdminNewAppointment = ({
     if (!foundService) return false;
 
     // timezone parsing
-    const appointmentStart = new Date(date);
+    const parsedDate = parseCzechInput(date)
+    const appointmentStart = parseDbTime(parsedDate);
     const appointmentEnd = new Date(
       appointmentStart.getTime() + foundService.duration * 60000,
     );
@@ -112,9 +113,9 @@ const AdminNewAppointment = ({
     console.log('🔍 Admin overlap check (Czech time):');
     console.log(
       '📅 New appointment:',
-      appointmentStart.toISOString(),
-      '-',
-      appointmentEnd.toISOString(),
+     formatCzechTime(appointmentStart),
+    '-',
+    formatCzechTime(appointmentEnd)
     );
     console.log(
       '📅 Local time:',
@@ -126,7 +127,7 @@ const AdminNewAppointment = ({
 
     // kolize logika
     const conflict = allAppointments.find((existing) => {
-      const existingStart = new Date(existing.date);
+      const existingStart = parseDbTime(existing.date);
       const existingEnd = new Date(
         existingStart.getTime() + (existing.duration || 0) * 60000,
       );
@@ -146,22 +147,15 @@ const AdminNewAppointment = ({
       const hasConflict = condition1 || condition2 || condition3;
 
       if (hasConflict) {
-        console.log('❌ Frontend conflict detected:');
-        console.log(
-          '📅 Existing:',
-          existingStart.toISOString(),
-          '-',
-          existingEnd.toISOString(),
-        );
-        console.log(
-          '📅 Local existing:',
-          formatCzechTime(existingStart),
-          '-',
-          formatCzechTime(existingEnd),
-        );
-        console.log('📅 Service:', existing.service);
-        console.log('📋 Conditions:', { condition1, condition2, condition3 });
-      }
+      console.log('❌ Frontend conflict detected (Czech local time):');
+      console.log(
+        '📅 Existing:',
+        formatCzechTime(existingStart),
+        '-',
+        formatCzechTime(existingEnd)
+      );
+      console.log('📋 Conditions:', { condition1, condition2, condition3 });
+    }
 
       return hasConflict;
     });
