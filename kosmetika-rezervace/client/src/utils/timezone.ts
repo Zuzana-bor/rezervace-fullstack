@@ -78,7 +78,7 @@ export const parseCzechInput = (dateString: string): string => {
   }
 
   // Přidej český timezone offset
-  const czechIsoString = dateString + '+01:00';
+  const czechIsoString = dateString + '+00:00';
   console.log('🇨🇿 parseCzechInput result:', czechIsoString);
   return czechIsoString;
 };
