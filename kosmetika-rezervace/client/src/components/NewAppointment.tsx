@@ -3,10 +3,13 @@ import { Button, MenuItem, TextField, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { getServices, Service } from '../api/services';
 import { getBlockedTimes, BlockedTime } from '../api/blockedTimes';
-import {
-  getAllAppointments,
-  Appointment as AnyAppointment,
-} from '../api/adminAppointments';
+import { getAllAppointments } from '../api/adminAppointments';
+type AnyAppointment = {
+  _id?: string;
+  date: string;
+  duration?: number;
+  [key: string]: any;
+};
 import { createAppointment } from '../api/appointments';
 
 interface NewAppointmentProps {
