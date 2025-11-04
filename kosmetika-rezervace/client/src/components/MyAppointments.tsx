@@ -1,5 +1,6 @@
 import { List, ListItem, ListItemText } from '@mui/material';
 import { formatCzechTime } from '../utils/timezone';
+import { formatForCalendar } from '../utils/timezone';
 
 type Appointment = {
   _id: string;
@@ -24,7 +25,7 @@ const MyAppointments = ({ appointments, error }: MyAppointmentsProps) => {
         appointments.map((app) => (
           <ListItem key={app._id}>
             <ListItemText
-              primary={`${formatCzechTime(app.date)} – ${app.service}`}
+              primary={`${formatForCalendar(app.date)} – ${app.service}`}
               secondary={`Cena: ${app.price} Kč`}
             />
           </ListItem>
