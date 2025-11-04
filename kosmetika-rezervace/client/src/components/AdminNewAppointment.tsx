@@ -6,6 +6,7 @@ import {
   getAllAppointments,
   AdminAppointment as AnyAppointment,
   createAppointmentAdmin,
+  updateAppointmentAdmin,
 } from '../api/adminAppointments';
 
 import { useAuth } from '../context/AuthContext';
@@ -16,19 +17,26 @@ import {
 } from '../utils/timezone';
 
 interface AdminNewAppointmentProps {
-  onCreated: () => void;
+  onCreated?: () => void;
   defaultDate?: string | null;
   prefilledClient?: {
     firstName: string;
     lastName: string;
     phone: string;
   };
+  // ✅ NOVÉ props pro edit:
+  editMode?: boolean;
+  appointmentToEdit?: any;
+  onUpdated?: () => void;
 }
 
 const AdminNewAppointment = ({
   onCreated,
   defaultDate,
   prefilledClient,
+  editMode = false, // ✅ NOVÉ
+  appointmentToEdit, // ✅ NOVÉ
+  onUpdated, // ✅ NOVÉ
 }: AdminNewAppointmentProps) => {
   const { user } = useAuth();
   const [date, setDate] = useState(() => {
@@ -101,6 +109,32 @@ const AdminNewAppointment = ({
     }
   }, [prefilledClient]);
 
+  // ✅ PŘIDEJTE useEffect pro naplnění edit formuláře:
+  useEffect(() => {
+    if (editMode && appointmentToEdit) {
+      console.log('📝 Edit mode - naplňuji formulář:', appointmentToEdit);
+
+      // Převeď datum na local datetime string
+      const appointmentDate = new Date(appointmentToEdit.date);
+      const dateTimeLocal = appointmentDate.toISOString().slice(0, 16);
+
+      setDate(dateTimeLocal);
+      setFirstName(appointmentToEdit.clientFirstName || '');
+      setLastName(appointmentToEdit.clientLastName || '');
+      setClientPhone(appointmentToEdit.clientPhone || '');
+      setNotes(appointmentToEdit.notes || '');
+
+      // Najdi službu podle názvu
+      const foundService = services.find(
+        (s) => s.name === appointmentToEdit.service,
+      );
+      if (foundService) {
+        setService(foundService._id);
+        console.log('📝 Nalezena služba pro edit:', foundService.name);
+      }
+    }
+  }, [editMode, appointmentToEdit, services]);
+
   const isOverlapping = () => {
     if (!date || !service) return false;
 
@@ -165,6 +199,7 @@ const AdminNewAppointment = ({
     return !!conflict;
   };
 
+  // ✅ UPRAVTE handleSubmit pro edit mode:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firstName.trim() || !lastName.trim()) {
@@ -196,54 +231,64 @@ const AdminNewAppointment = ({
       return;
     }
     try {
-      // Najdi název služby podle _id
       const foundService = services.find((s) => s._id === service);
       if (!foundService) {
         alert('Vybraná služba nebyla nalezena.');
         return;
       }
+
       const czechTimeString = parseCzechInput(date);
-      console.log('📤 Sending to API:', czechTimeString);
+      console.log('📤 Odesílám data:', { editMode, czechTimeString });
 
-      await createAppointmentAdmin({
-        date: parseCzechInput(date),
-        service: foundService.name,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        clientPhone: clientPhone.trim(),
-        notes: notes.trim() || undefined,
-      });
+      if (editMode && appointmentToEdit) {
+        // ✅ EDIT MODE - upravit existující
+        await updateAppointmentAdmin(appointmentToEdit._id, {
+          date: czechTimeString,
+          service: foundService.name,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          clientPhone: clientPhone.trim(),
+          notes: notes.trim() || undefined,
+        });
 
-      alert('Objednávka byla úspěšně vytvořena!');
-      setDate('');
-      setService('');
-      setFirstName('');
-      setLastName('');
-      setClientPhone('');
-      setNotes('');
-      if (onCreated) onCreated();
-    } catch (err) {
-      console.error('Chyba při odesílání objednávky:', err);
-      if (
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as any).response === 'object' &&
-        (err as any).response !== null
-      ) {
-        const response = (err as any).response;
-        if (response.status === 409) {
-          alert('Tento termín je již obsazený. Vyberte prosím jiný čas.');
-        } else if (response.status === 400) {
-          alert(response.data?.message || 'Neplatné údaje rezervace.');
-        } else {
-          alert(
-            'Chyba při vytváření objednávky. Zkontrolujte připojení a zadané údaje.',
-          );
-        }
+        alert('Rezervace byla úspěšně upravena!');
+        if (onUpdated) onUpdated();
+      } else {
+        // ✅ CREATE MODE - vytvořit novou
+        await createAppointmentAdmin({
+          date: czechTimeString,
+          service: foundService.name,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          clientPhone: clientPhone.trim(),
+          notes: notes.trim() || undefined,
+        });
+
+        alert('Objednávka byla úspěšně vytvořena!');
+        if (onCreated) onCreated();
+      }
+
+      // Reset formuláře jen v create mode
+      if (!editMode) {
+        setDate('');
+        setService('');
+        setFirstName('');
+        setLastName('');
+        setClientPhone('');
+        setNotes('');
+      }
+    } catch (err: any) {
+      console.error(
+        `❌ Chyba při ${editMode ? 'úpravě' : 'vytváření'} rezervace:`,
+        err,
+      );
+
+      if (err.response?.status === 409) {
+        alert('Tento termín je již obsazený. Vyberte prosím jiný čas.');
       } else {
         alert(
-          'Chyba při vytváření objednávky. Zkontrolujte připojení a zadané údaje.',
+          `Chyba při ${editMode ? 'úpravě' : 'vytváření'} rezervace: ` +
+            (err.response?.data?.message || err.message),
         );
       }
     }
@@ -327,7 +372,7 @@ const AdminNewAppointment = ({
           }}
           disabled={isOverlapping()}
         >
-          Objednat klientku
+          {editMode ? 'Uložit změny' : 'Objednat klientku'}
         </Button>
         {isOverlapping() && (
           <Typography color="error" sx={{ mt: 1 }}>

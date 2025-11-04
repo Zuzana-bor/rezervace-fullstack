@@ -31,9 +31,16 @@ export const updateAppointmentAdmin = async (
     firstName?: string;
     lastName?: string;
     clientPhone?: string;
+    notes?: string; // ✅ PŘIDÁNO
   },
 ): Promise<void> => {
-  await axiosInstance.put(`/admin/appointments/${appointmentId}`, data);
+  console.log('✏️ API: Upravuji admin appointment:', appointmentId, data);
+  const response = await axiosInstance.put(
+    `/admin/appointments/${appointmentId}`,
+    data,
+  );
+  console.log('✅ API: Admin appointment updated');
+  return response.data;
 };
 
 export const createAppointmentAdmin = async ({

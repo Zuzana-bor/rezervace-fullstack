@@ -33,6 +33,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
   const [showEventDetail, setShowEventDetail] = useState(false);
   const [showNewAppointment, setShowNewAppointment] = useState(false);
   const [defaultDate, setDefaultDate] = useState<string | null>(null);
+  const [showEditAppointment, setShowEditAppointment] = useState(false);
 
   useEffect(() => {
     getAllAppointments().then((r) => {
@@ -232,6 +233,16 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
           </DialogContent>
           <DialogActions>
             <Button
+              onClick={() => {
+                setShowEventDetail(false);
+                setShowEditAppointment(true);
+              }}
+              color="primary"
+              variant="outlined"
+            >
+              upravit rezervaci
+            </Button>
+            <Button
               onClick={handleDeleteAppointment}
               color="error"
               variant="outlined"
@@ -282,6 +293,49 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setShowNewAppointment(false)}>Zrušit</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* ✅ Dialog pro úpravu rezervace */}
+        <Dialog
+          open={showEditAppointment}
+          onClose={() => setShowEditAppointment(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Upravit rezervaci</DialogTitle>
+          <DialogContent>
+            <AdminNewAppointment
+              editMode={true} // ✅ Edit mode
+              appointmentToEdit={selectedEvent} // ✅ Předvyplněná data
+              onUpdated={() => {
+                setShowEditAppointment(false);
+                // Refresh kalendáře po úpravě
+                getAllAppointments().then((r) => {
+                  setRawEvents(r);
+                  setEvents(
+                    r.map((a: any) => ({
+                      id: a._id,
+                      title: `${a.service} – ${
+                        a.userId
+                          ? `${a.userId.firstName} ${a.userId.lastName}`
+                          : a.clientFirstName && a.clientLastName
+                          ? `${a.clientFirstName} ${a.clientLastName}`
+                          : 'Neznámý klient'
+                      }`,
+                      start: formatForCalendar(a.date),
+                      _id: a._id,
+                      ...a,
+                    })),
+                  );
+                });
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowEditAppointment(false)}>
+              Zrušit
+            </Button>
           </DialogActions>
         </Dialog>
       </CardContent>
