@@ -171,25 +171,29 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                 </Typography>
                 <Typography>
                   <strong>Datum:</strong>{' '}
-                  {/* ✅ OPRAVENO - používám čas z kalendáře */}
+                  {/* ✅ OPRAVENO - použiju přímo čas z kalendáře bez převodu timezone */}
                   {selectedEvent.displayTime
-                    ? selectedEvent.displayTime.toLocaleString('cs-CZ', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
+                    ? selectedEvent.displayTime
+                        .toLocaleString('en-GB', {
+                          timeZone: 'UTC', // ✅ ZŮSTÁVÁ v UTC (stejně jako kalendář)
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                        .replace(/(\d+)\/(\d+)\/(\d+),/, '$3.$2.$1 v') // ✅ České formátování
                     : selectedEvent.date
-                    ? new Date(
-                        formatForCalendar(selectedEvent.date),
-                      ).toLocaleString('cs-CZ', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
+                    ? new Date(formatForCalendar(selectedEvent.date))
+                        .toLocaleString('en-GB', {
+                          timeZone: 'UTC',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                        .replace(/(\d+)\/(\d+)\/(\d+),/, '$3.$2.$1 v')
                     : 'Neplatné datum'}
                 </Typography>
                 <Typography>
