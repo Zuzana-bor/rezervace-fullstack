@@ -15,12 +15,10 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useState, useEffect } from 'react';
-import { getAllAppointments } from '../api/adminAppointments';
-import { deleteAppointment } from '../api/appointments';
-import { formatCzechTime, formatForCalendar } from '../utils/timezone';
+import { getAllAppointments } from '../api/adminAppointments'; // ✅ Admin API pro načítání
+import { deleteAppointment } from '../api/appointments'; // ✅ User API pro mazání
+import { formatForCalendar } from '../utils/timezone';
 import AdminNewAppointment from './AdminNewAppointment';
-import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 
 interface AdminCalendarProps {
   refreshKey: number;
@@ -35,36 +33,39 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
   const [defaultDate, setDefaultDate] = useState<string | null>(null);
   const [showEditAppointment, setShowEditAppointment] = useState(false);
 
-  useEffect(() => {
-    getAllAppointments().then((r) => {
-      console.log('📅 DEBUGGING - Raw appointments from backend:', r);
+  // ✅ HELPER funkce pro refresh kalendáře
+  const refreshCalendar = async () => {
+    const appointments = await getAllAppointments();
+    console.log('📅 DEBUGGING - Raw appointments from backend:', appointments);
 
-      setRawEvents(r);
-      setEvents(
-        r.map((a: any) => {
-          const appointmentDate = new Date(a.date);
-          console.log(
-            `📅 CZECH TIME - ${a.service} raw: ${
-              a.date
-            }, formatted: ${formatCzechTime(a.date, 'dd.MM.yyyy HH:mm')}`,
-          );
+    setRawEvents(appointments);
 
-          return {
-            id: a._id,
-            title: `${a.service} – ${
-              a.userId
-                ? `${a.userId.firstName} ${a.userId.lastName}`
-                : a.clientFirstName && a.clientLastName
-                ? `${a.clientFirstName} ${a.clientLastName}`
-                : 'Neznámý klient'
-            }`,
-            start: formatForCalendar(a.date), // ✅ Czech timezone
-            _id: a._id,
-            ...a,
-          };
-        }),
+    const calendarEvents = appointments.map((a: any) => {
+      const calendarTime = formatForCalendar(a.date);
+      console.log(
+        `📅 EVENT - ${a.service} raw: ${a.date}, calendar: ${calendarTime}`,
       );
+
+      return {
+        id: a._id,
+        title: `${a.service} – ${
+          a.userId
+            ? `${a.userId.firstName} ${a.userId.lastName}`
+            : a.clientFirstName && a.clientLastName
+            ? `${a.clientFirstName} ${a.clientLastName}`
+            : 'Neznámý klient'
+        }`,
+        start: calendarTime, // ✅ KONZISTENTNÍ - vždy formatForCalendar
+        _id: a._id,
+        ...a,
+      };
     });
+
+    setEvents(calendarEvents);
+  };
+
+  useEffect(() => {
+    refreshCalendar();
   }, [refreshKey]);
 
   const handleDateClick = (info: any) => {
@@ -73,9 +74,25 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
     setShowNewAppointment(true);
   };
 
+  // ✅ OPRAVENO - přidám debug pro time rozdíly
   const handleEventClick = (info: any) => {
     const eventData = rawEvents.find((e) => e._id === info.event.id);
-    setSelectedEvent(eventData);
+
+    // ✅ DEBUG - co zobrazuje kalendář vs co je v DB
+    console.log('🔍 EVENT CLICK DEBUG:', {
+      eventId: info.event.id,
+      calendarDisplayTime: info.event.start,
+      rawDbDate: eventData?.date,
+      formatForCalendarResult: formatForCalendar(eventData?.date || ''),
+    });
+
+    // ✅ PŘIDÁNO - uložím čas jak ho zobrazuje kalendář
+    const eventWithCalendarTime = {
+      ...eventData,
+      displayTime: info.event.start, // ✅ Čas z kalendáře
+    };
+
+    setSelectedEvent(eventWithCalendarTime);
     setShowEventDetail(true);
   };
 
@@ -85,29 +102,9 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
     if (window.confirm('Opravdu chcete smazat tuto rezervaci?')) {
       try {
         console.log('🗑️ Admin mazání rezervace:', selectedEvent._id);
-        await deleteAppointment(selectedEvent._id); // ✅ Admin endpoint
+        await deleteAppointment(selectedEvent._id); // call API delete function
         setShowEventDetail(false);
-
-        // ✅ Refresh s admin API
-        const updatedAppointments = await getAllAppointments();
-        setRawEvents(updatedAppointments);
-
-        setEvents(
-          updatedAppointments.map((a: any) => ({
-            id: a._id,
-            title: `${a.service} – ${
-              a.userId
-                ? `${a.userId.firstName} ${a.userId.lastName}`
-                : a.clientFirstName && a.clientLastName
-                ? `${a.clientFirstName} ${a.clientLastName}`
-                : 'Neznámý klient'
-            }`,
-            start: formatForCalendar(a.date), // ✅ Czech timezone
-            _id: a._id,
-            ...a,
-          })),
-        );
-
+        await refreshCalendar(); // ✅ POUŽIJU helper funkci
         console.log('✅ Admin rezervace smazána a kalendář aktualizován');
       } catch (error) {
         console.error('❌ Chyba při mazání rezervace:', error);
@@ -174,8 +171,25 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
                 </Typography>
                 <Typography>
                   <strong>Datum:</strong>{' '}
-                  {selectedEvent.date
-                    ? formatCzechTime(selectedEvent.date)
+                  {/* ✅ OPRAVENO - používám čas z kalendáře */}
+                  {selectedEvent.displayTime
+                    ? selectedEvent.displayTime.toLocaleString('cs-CZ', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : selectedEvent.date
+                    ? new Date(
+                        formatForCalendar(selectedEvent.date),
+                      ).toLocaleString('cs-CZ', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
                     : 'Neplatné datum'}
                 </Typography>
                 <Typography>
@@ -240,7 +254,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
               color="primary"
               variant="outlined"
             >
-              upravit rezervaci
+              Upravit rezervaci
             </Button>
             <Button
               onClick={handleDeleteAppointment}
@@ -265,28 +279,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
             <AdminNewAppointment
               onCreated={() => {
                 setShowNewAppointment(false);
-                // Refresh kalendáře po vytvoření
-                getAllAppointments().then((r) => {
-                  setRawEvents(r);
-                  setEvents(
-                    r.map((a: any) => {
-                      const appointmentDate = new Date(a.date);
-                      return {
-                        id: a._id,
-                        title: `${a.service} – ${
-                          a.userId
-                            ? `${a.userId.firstName} ${a.userId.lastName}`
-                            : a.clientFirstName && a.clientLastName
-                            ? `${a.clientFirstName} ${a.clientLastName}`
-                            : 'Neznámý klient'
-                        }`,
-                        start: a.date, // ZMĚNA: Přesně to co vrací backend
-                        _id: a._id,
-                        ...a,
-                      };
-                    }),
-                  );
-                });
+                refreshCalendar(); // ✅ POUŽIJU helper funkci
               }}
               defaultDate={defaultDate}
             />
@@ -296,7 +289,7 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
           </DialogActions>
         </Dialog>
 
-        {/* ✅ Dialog pro úpravu rezervace */}
+        {/* Dialog pro úpravu rezervace */}
         <Dialog
           open={showEditAppointment}
           onClose={() => setShowEditAppointment(false)}
@@ -306,29 +299,11 @@ const AdminCalendar = ({ refreshKey }: AdminCalendarProps) => {
           <DialogTitle>Upravit rezervaci</DialogTitle>
           <DialogContent>
             <AdminNewAppointment
-              editMode={true} // ✅ Edit mode
-              appointmentToEdit={selectedEvent} // ✅ Předvyplněná data
+              editMode={true}
+              appointmentToEdit={selectedEvent}
               onUpdated={() => {
                 setShowEditAppointment(false);
-                // Refresh kalendáře po úpravě
-                getAllAppointments().then((r) => {
-                  setRawEvents(r);
-                  setEvents(
-                    r.map((a: any) => ({
-                      id: a._id,
-                      title: `${a.service} – ${
-                        a.userId
-                          ? `${a.userId.firstName} ${a.userId.lastName}`
-                          : a.clientFirstName && a.clientLastName
-                          ? `${a.clientFirstName} ${a.clientLastName}`
-                          : 'Neznámý klient'
-                      }`,
-                      start: formatForCalendar(a.date),
-                      _id: a._id,
-                      ...a,
-                    })),
-                  );
-                });
+                refreshCalendar(); // ✅ POUŽIJU helper funkci
               }}
             />
           </DialogContent>
